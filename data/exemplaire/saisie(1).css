@@ -1,0 +1,78 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #eef2f3;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 1s ease-in;
+    overflow: hidden; /* Empêche le défilement */
+}
+
+.container {
+    background: #fff;
+    width: 420px;               /* Largeur fixe */
+    height: auto;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    animation: fadeIn 0.8s ease-out;
+    box-sizing: border-box;
+}
+
+form {
+    display: block;
+}
+
+label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #444;
+    font-size: 15px;
+}
+
+input[type="text"],
+input[type="date"],
+input[type="number"],
+input[type="email"],
+select {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    background-color: #fafafa;
+}
+
+input[type="submit"] {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    background: linear-gradient(45deg, #4facfe, #00f2fe);
+    border: none;
+    color: white;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+input[type="submit"]:hover {
+    background: linear-gradient(45deg, #00c6fb, #005bea);
+}
+
+/* Supprime la réactivité mobile */
+@media (max-width: 600px) {
+    .container {
+        width: 420px;
+        padding: 40px;
+    }
+
+    body {
+        overflow: auto;
+    }
+}

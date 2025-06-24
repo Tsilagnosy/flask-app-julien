@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        .container {
+            text-align: center;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 300px;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .input-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            padding: 8px;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        input[type="text"], input[type="password"], input[type="email"] {
+            border: none;
+            outline: none;
+            width: 100%;
+            padding: 8px;
+            font-size: 16px;
+            background: transparent;
+        }
+        button {
+            background: linear-gradient(45deg, #FFA500, #87CEFA);
+            border: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        .password-toggle {
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .create-account {
+            margin-top: 10px;
+            color: blue;
+            cursor: pointer;
+            text-decoration: underline;
+            float: right;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Hi! Welcome</h2>
+        
+        <form method="post" action="{{ url_for('login') }}">
+            <div class="input-container">
+                <input type="text" name="username" placeholder="Nom d'utilisateur" required>
+            </div>
+
+            <div class="input-container">
+                <input type="password" id="password" placeholder="Mot de passe">
+                <span class="password-toggle" onclick="togglePassword()">🔒</span>
+            </div>
+
+            <button type="submit">Se connecter</button>
+        </form>
+
+        <div class="create-account" onclick="window.location.href='create_account.html'">
+            Create an Account
+        </div>
+    </div>
+
+    <script>
+        function togglePassword() {
+            let passwordInput = document.getElementById("password");
+            let toggleIcon = document.querySelector(".password-toggle");
+
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                toggleIcon.textContent = "👁️";
+            } else {
+                passwordInput.type = "password";
+                toggleIcon.textContent = "🔒";
+            }
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Formulaire de Saisie</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='saisie.css') }}">
+</head>
+<body>
+    <div class="container">
+    <h2>Formulaire de Saisie</h2>
+    <form method="post">
+        Nom: <input type="text" name="nom" required><br><br>
+        Cell: <input type="text" name="cell" required><br><br>
+        Numéro: <input type="text" name="numero" required><br><br>
+        Fruit: <input type="text" name="fruit"><br><br>
+        NumFruit: <input type="text" name="num_fruit"><br><br>
+        Adresse: <input type="text" name="adresse"><br><br>
+        Occupation: <input type="text" name="occupation"><br><br>
+        Sexe (Homme/Femme): <input type="text" name="gender" required><br><br>
+        Date de Naissance: <input type="date" name="dob"><br><br>
+        Religion: <input type="text" name="religion"><br><br>
+        <input type="submit" value="Envoyer">
+    </form>
+    </div>
+</body>
+</html>
