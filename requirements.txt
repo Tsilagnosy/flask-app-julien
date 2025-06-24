@@ -4,3 +4,5 @@ pandas
 openpyxl
 pyngrok
 python-dotenv
+gspread
+oauth2client
