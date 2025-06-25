@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Plateforme innovante en développement constant - Découvrez notre univers numérique en évolution">
+  <title>Innovation Numérique | Projet en Développement</title>
+  
+  <!-- Préconnexion pour améliorer les performances -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  
+  <!-- Google Fonts - Modern Font Stack -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
+  
+  <style>
+    :root {
+      --primary-color: #00e0ff;
+      --primary-dark: #00b4cc;
+      --bg-gradient-start: #0d1b2a;
+      --bg-gradient-mid: #1b263b;
+      --bg-gradient-end: #415a77;
+      --text-light: #f8f9fa;
+      --text-muted: #dee2e6;
+      --transition-speed: 0.3s;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-mid), var(--bg-gradient-end));
+      color: var(--text-light);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+    
+    header {
+      margin-bottom: 3rem;
+      animation: fadeInDown 0.8s ease-out;
+    }
+    
+    h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: var(--primary-color);
+      line-height: 1.2;
+    }
+    
+    .emoji {
+      display: inline-block;
+      animation: pulse 2s infinite;
+    }
+    
+    p {
+      font-size: clamp(1rem, 1.2vw, 1.3rem);
+      margin-bottom: 1.8rem;
+      opacity: 0.95;
+      text-align: center;
+      animation: fadeIn 1s ease-out forwards;
+    }
+    
+    p:nth-child(2) { animation-delay: 0.2s; }
+    p:nth-child(3) { animation-delay: 0.4s; }
+    p:nth-child(4) { animation-delay: 0.6s; }
+    p:nth-child(5) { animation-delay: 0.8s; }
+    
+    .footer {
+      margin-top: 3rem;
+      font-style: italic;
+      color: var(--text-muted);
+      opacity: 0.8;
+      font-size: 0.9rem;
+      animation: fadeIn 1.5s ease-out;
+    }
+    
+    .cta-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 3rem;
+      width: 5.5rem;
+      height: 5.5rem;
+      background-color: var(--primary-color);
+      color: #003944;
+      border: none;
+      border-radius: 50%;
+      font-size: 1.8rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all var(--transition-speed) ease;
+      box-shadow: 0 4px 15px rgba(0, 224, 255, 0.3);
+      animation: float 4s ease-in-out infinite;
+    }
+    
+    .cta-button:hover, .cta-button:focus {
+      background-color: var(--primary-dark);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0, 180, 204, 0.4);
+      outline: none;
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      body {
+        padding: 1.5rem 1rem;
+      }
+      
+      .container {
+        padding: 0 1rem;
+      }
+      
+      h1 {
+        margin-bottom: 1rem;
+      }
+      
+      .cta-button {
+        width: 4.5rem;
+        height: 4.5rem;
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+  <meta name="google-site-verification" content="BJpSxCUHUrD-bKUA2tKV4I5FiNooVIfxH5QBBk17nm0" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1><span class="emoji">🚀</span> Félicitations pour votre visite !</h1>
+    </header>
+    
+    <main>
+      <p>
+        Vous n'êtes pas ici par hasard. Ce site est une invitation à découvrir un univers de projets dynamiques, innovants et en constante évolution. Il ne s'agit pas simplement d'une vitrine, mais d'un terrain d'expérimentation où les idées prennent forme.
+      </p>
+      
+      <p>
+        Nous sommes actuellement dans une phase de développement intense. D'ici trois mois, cette plateforme subira une métamorphose impressionnante vers quelque chose de plus vaste et plus puissant.
+      </p>
+      
+      <p>
+        Ce site s'adresse aux esprits curieux, aux passionnés de technologie et à ceux qui veulent participer à la construction du monde numérique de demain.
+      </p>
+      
+      <p>
+        L'identité du développeur reste volontairement mystérieuse pour le moment. Laissez-vous guider par l'énergie du projet et soyez les bienvenus dans cette communauté en devenir.
+      </p>
+      <div class="cta-button">
+      <button  class="community-btn" onclick="window.location.href='{{ url_for('communaute') }}'">↪</button>
+      </div>
+    </main>
+    
+    <footer class="footer">
+      Le meilleur est encore à venir...
+    </footer>
+  </div>
+  
+  <!-- Scripts optimisés en bas de page -->
+  <script>
+    // Optimisation : Chargement différé des éléments non critiques
+    document.addEventListener('DOMContentLoaded', function() {
+      // Animation supplémentaire au scroll
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('animated');
+          }
+        });
+      }, { threshold: 0.1 });
+      
+      document.querySelectorAll('p').forEach(p => {
+        observer.observe(p);
+      });
+    });
+  </script>
+</body>
+</html>
