@@ -484,145 +484,59 @@
     </div>
   </div>
 
-  <script>
-    function selectGender(element, gender) {
-      document.querySelectorAll('.gender-option').forEach(opt => opt.classList.remove('selected'));
-      element.classList.add('selected');
-      document.getElementById('gender').value = gender;
-    }
-
-    function toggleCustomReligion(select) {
-      const customInput = document.getElementById('custom-religion');
-      if (select.value === 'autre') {
-        select.removeAttribute('name');
-        customInput.style.display = 'block';
-        customInput.setAttribute('name', 'religion');
-        customInput.required = true;
-      } else {
-        select.setAttribute('name', 'religion');
-        customInput.removeAttribute('name');
-        customInput.style.display = 'none';
-        customInput.required = false;
-        customInput.value = '';
-      }
-    }
-    // Date Picker personnalisé
-    const datePicker = document.getElementById('date-picker');
+<script>
+  document.getElementById('main-form').addEventListener('submit', function(e) {
     const dobInput = document.getElementById('dob');
-    const yearInput = document.getElementById('year-input');
-    let selectedMonth = -1;
+    const genderValue = document.getElementById('gender').value;
 
-    function toggleDatePicker() {
-        datePicker.classList.toggle('show');
+    const dateRegex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
+    if (!dateRegex.test(dobInput.value)) {
+      e.preventDefault();
+      alert('Veuillez entrer une date valide au format JJ/MM/AAAA');
+      return;
     }
 
-    function changeYear(delta) {
-        yearInput.value = parseInt(yearInput.value) + delta;
+    if (!genderValue) {
+      e.preventDefault();
+      alert('Veuillez sélectionner votre sexe');
+      return;
     }
 
-    function selectMonth(month) {
-        selectedMonth = month;
+    // ✅ Si tous les champs sont valides, on laisse le formulaire partir vers Flask
+  });
 
-        document.querySelectorAll('.month-btn').forEach((btn, i) => {
-            btn.classList.toggle('selected', i === month);
-        });
+  // 🎯 Gestion visuelle du genre
+  function selectGender(element, gender) {
+    document.querySelectorAll('.gender-option').forEach(opt => opt.classList.remove('selected'));
+    element.classList.add('selected');
+    document.getElementById('gender').value = gender;
+  }
 
-        dobInput.value = `01/${(month + 1).toString().padStart(2, '0')}/${yearInput.value}`;
-
-        setTimeout(() => {
-            datePicker.classList.remove('show');
-        }, 300);
+  // 📜 Religion personnalisée
+  function toggleCustomReligion(select) {
+    const customInput = document.getElementById('custom-religion');
+    if (select.value === 'autre') {
+      select.removeAttribute('name');
+      customInput.style.display = 'block';
+      customInput.setAttribute('name', 'religion');
+      customInput.required = true;
+    } else {
+      select.setAttribute('name', 'religion');
+      customInput.removeAttribute('name');
+      customInput.style.display = 'none';
+      customInput.required = false;
+      customInput.value = '';
     }
+  }
 
-    yearInput.addEventListener('change', () => {
-        if (selectedMonth !== -1) {
-            selectMonth(selectedMonth);
-        }
-    });
-
-    // Formatage auto du champ date
-    dobInput.addEventListener('input', function(e) {
-        let value = e.target.value.replace(/\D/g, '');
-        if (value.length > 2) value = value.slice(0, 2) + '/' + value.slice(2);
-        if (value.length > 5) value = value.slice(0, 5) + '/' + value.slice(5, 9);
-        e.target.value = value;
-    });
-
-    // Gestion du sexe
-    function selectGender(element, gender) {
-        document.querySelectorAll('.gender-option').forEach(opt => opt.classList.remove('selected'));
-        element.classList.add('selected');
-        document.getElementById('gender').value = gender;
-    }
-
-    // Religion personnalisée
-    function toggleCustomReligion(select) {
-        const customInput = document.getElementById('custom-religion');
-        if (select.value === 'autre') {
-            select.removeAttribute('name');
-            customInput.style.display = 'block';
-            customInput.setAttribute('name', 'religion');
-            customInput.required = true;
-        } else {
-            select.setAttribute('name', 'religion');
-            customInput.removeAttribute('name');
-            customInput.style.display = 'none';
-            customInput.required = false;
-            customInput.value = '';
-        }
-    }
-
-    // Validation + nettoyage au submit
-    document.getElementById('main-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        const dateRegex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
-        if (!dateRegex.test(dobInput.value)) {
-            alert('Veuillez entrer une date valide au format JJ/MM/AAAA');
-            return;
-        }
-
-        if (!document.getElementById('gender').value) {
-            alert('Veuillez sélectionner votre sexe');
-            return;
-        }
-
-        // Ici tu peux envoyer les données vers Flask si besoin
-
-        alert("Formulaire soumis avec succès !");
-        resetForm();
-    });
-
-    // Nettoyage complet du formulaire
-    function resetForm() {
-        const form = document.getElementById('main-form');
-        form.reset();
-
-        document.querySelectorAll('.gender-option').forEach(opt => opt.classList.remove('selected'));
-        document.querySelectorAll('.month-btn').forEach(btn => btn.classList.remove('selected'));
-
-        selectedMonth = -1;
-        datePicker.classList.remove('show');
-        dobInput.value = '';
-
-        const customReligion = document.getElementById('custom-religion');
-        const religionSelect = document.getElementById('religion-select');
-        if (customReligion && religionSelect) {
-            customReligion.value = '';
-            customReligion.style.display = 'none';
-            customReligion.removeAttribute('name');
-            customReligion.required = false;
-            religionSelect.setAttribute('name', 'religion');
-            religionSelect.value = '';
-        }
-    }
-
-    // Réinitialiser même après retour navigateur
-    window.addEventListener('pageshow', function(event) {
-        if (event.persisted) {
-            resetForm();
-        }
-    });
+  // 📅 Formatage automatique date
+  const dobInput = document.getElementById('dob');
+  dobInput.addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length > 2) value = value.slice(0, 2) + '/' + value.slice(2);
+    if (value.length > 5) value = value.slice(0, 5) + '/' + value.slice(5, 9);
+    e.target.value = value;
+  });
 </script>
 </body>
 </html>
