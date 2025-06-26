@@ -8,7 +8,7 @@ from flask import Flask, session, request, redirect, url_for, render_template, a
 from flask_mail import Mail, Message
 from datetime import datetime, timedelta
 from oauth2client.service_account import ServiceAccountCredentials
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 from pymongo import MongoClient 
 from db import inserer_utilisateur, verifier_credentiels
 from dotenv import load_dotenv
