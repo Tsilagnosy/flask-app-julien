@@ -1,8 +1,8 @@
 Flask
-gunicorn
-pandas
-openpyxl
-gspread
-oauth2client
-requests
+Flask-Mail
+pymongo
+dnspython
 python-dotenv
+werkzeug
+oauth2client       # si Google Sheets est utilisé
+gspread            # idem

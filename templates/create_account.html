@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Créer un compte</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(45deg, rgb(255, 165, 0), rgb(138, 43, 226));
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .form-container {
+      background: #fff;
+      padding: 25px 30px;
+      border-top: 8px solid;
+      border-left:20px solid;
+      border-right:20px solid;
+      border-bottom:8px solid;
+      border-image: linear-gradient(45deg, rgb(255, 165, 0), rgb(138, 43, 226)) 1;
+      border-radius: 5px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      width: 350px;
+      box-sizing: border-box;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 24px;
+      font-weight: bold;
+      background: linear-gradient(45deg, #FFA500, #8A2BE2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+      position: relative;
+    }
+
+    input[type="text"],
+    input[type="tel"],
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px 40px 10px 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      outline: none;
+      font-size: 15px;
+      box-sizing: border-box;
+    }
+
+    .toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      font-size: 18px;
+      color: #666;
+      user-select: none;
+    }
+
+    .submit-btn {
+      background: linear-gradient(45deg, #FFA500, #87CEFA);
+      color: white;
+      border: none;
+      padding: 10px;
+      width: 100%;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .alt-option {
+      font-size: 13px;
+      color: #11CFFF;
+      margin-top: 8px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="form-container">
+  <h2>Créer un compte</h2>
+  <form method="post" action="{{ url_for('create_account') }}">
+    
+    <div class="form-group">
+      <input type="text" name="nom" maxlength="25" placeholder="Nom" required>
+    </div>
+
+    <div class="form-group">
+      <input type="text" name="prenom" maxlength="32" placeholder="Prénom" required>
+    </div>
+
+    <div class="form-group">
+      <input type="text" name="cell" placeholder="Cell" required>
+    </div>
+
+    <div class="form-group">
+      <input type="tel" name="numero" placeholder="Numéro de téléphone" required>
+    </div>
+
+    <div class="form-group">
+      <input type="text" name="duty" placeholder="Duty (OM, CW, IW, CS, BM)" required>
+    </div>
+
+    <div class="form-group">
+      <input type="text" name="id_apk" placeholder="ID APK (facultatif)">
+    </div>
+
+    <div class="form-group">
+      <input type="email" id="email" name="email" placeholder="Adresse e-mail">
+    </div>
+
+    <div class="form-group">
+      <input type="text" id="telegram" name="telegram" placeholder="@votre_username_telegram">
+    </div>
+
+    <div class="alt-option">
+      Pas d'e-mail?Entrez votre <strong>Username Telegram</strong>.
+    </div>
+
+    <div class="form-group">
+      <input type="password" id="password" name="password" placeholder="Mot de passe" required>
+      <span class="toggle" onclick="togglePassword('password')">👁️</span>
+    </div>
+
+    <div class="form-group">
+      <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirmer le mot de passe" required>
+      <span class="toggle" onclick="togglePassword('confirm_password')">👁️</span>
+    </div>
+
+    <button type="submit" class="submit-btn">S'inscrire</button>
+  </form>
+</div>
+
+<script>
+  function togglePassword(id) {
+    const field = document.getElementById(id);
+    field.type = field.type === "password" ? "text" : "password";
+  }
+
+  document.querySelector('form').addEventListener('submit', function (e) {
+    const email = document.getElementById('email').value.trim();
+    const telegram = document.getElementById('telegram').value.trim();
+    const pwd = document.getElementById('password').value;
+    const confirm = document.getElementById('confirm_password').value;
+
+    if (!email && !telegram) {
+      alert("Veuillez fournir une adresse e-mail ou un identifiant Telegram.");
+      e.preventDefault();
+    } else if (pwd !== confirm) {
+      alert("Les mots de passe ne correspondent pas.");
+      e.preventDefault();
+    }
+  });
+</script>
+
+</body>
+</html>
