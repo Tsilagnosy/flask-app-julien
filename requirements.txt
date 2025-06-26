@@ -6,3 +6,4 @@ python-dotenv
 werkzeug
 oauth2client       # si Google Sheets est utilisé
 gspread            # idem
+gunicorn
