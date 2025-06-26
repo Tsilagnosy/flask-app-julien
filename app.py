@@ -25,7 +25,11 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET", "clé-temporaire-par-défaut")
 app.config["SESSION_COOKIE_SECURE"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-
+#Route principal
+@app.route('/')
+def accueil():
+    return render_template('index.html')
+    
 # 📧 --- CONFIGURATION FLASK-MAIL ---
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
