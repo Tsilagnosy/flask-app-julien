@@ -57,19 +57,28 @@ def envoyer_code_par_mail(destinataire, code, nom):
         print(f"❌ Erreur email : {e}")
 
 # 🤖 --- ENVOI DU CODE PAR TELEGRAM ---
-def envoyer_code_par_telegram(username_telegram, code):
-    token = "5948873750:AAGw5lS8xeVlCViKPo8hpSILb2xPAqxiVno"
-    message = f"👋 Bonjour ! Voici votre code de validation : {code}"
+def envoyer_code_par_telegram(chat_id, code):
+    token = os.getenv("TELEGRAM_BOT_TOKEN")
+    if not token:
+        print("❌ Token Telegram manquant")
+        return
+
+    message = f"👋 Bonjour ! Voici votre code de validation : *{code}*"
     url = f"https://api.telegram.org/bot{token}/sendMessage"
-    data = {"chat_id": username_telegram, "text": message}
+    data = {
+        "chat_id": chat_id,
+        "text": message,
+        "parse_mode": "Markdown"
+    }
+
     try:
         response = requests.post(url, data=data)
-        if response.status_code == 200:
+        if response.ok:
             print("✅ Code envoyé sur Telegram")
         else:
-            print(f"❌ Échec Telegram : {response.text}")
+            print(f"❌ Échec : {response.status_code} – {response.text}")
     except Exception as e:
-        print(f"❌ Erreur Telegram : {e}")
+        print(f"❌ Exception Telegram : {e}")
 
 # 🧾 --- PAGE CRÉATION DE COMPTE ---
 @app.route('/create_account', methods=['GET', 'POST'])
