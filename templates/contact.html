@@ -2,36 +2,193 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Contactez le développeur</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <style>
-    body { background-color: #f8f9fa; }
+    body {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      min-height: 100vh;
+      padding: 20px;
+      font-size: 16px; /* Taille de police de base assurée */
+    }
     .contact-card {
       max-width: 600px;
-      margin: auto;
-      padding: 2rem;
+      margin: 40px auto;
+      padding: 2.5rem;
       background: white;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      border: none;
+      transition: transform 0.3s ease;
+      border-top: 5px solid #6c5ce7;
+    }
+    .contact-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px rgba(108, 92, 231, 0.15);
+    }
+    .contact-header {
+      color: #2d3436;
+      margin-bottom: 2rem;
+      text-align: center;
+      position: relative;
+      padding-bottom: 15px;
+    }
+    .contact-header:after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(to right, #6c5ce7, #a29bfe);
+      border-radius: 4px;
+    }
+    .contact-header i {
+      font-size: 1.8rem;
+      vertical-align: middle;
+      margin-right: 10px;
+      background: linear-gradient(to right, #6c5ce7, #a29bfe);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .form-control {
+      border: 1px solid #dfe6e9;
       border-radius: 10px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      padding: 12px 15px;
+      transition: all 0.3s;
+      font-size: 16px; /* Assurance de la taille de police */
+      min-height: 48px; /* Hauteur minimale pour éviter le zoom */
+    }
+    @media screen and (max-width: 480px) {
+      .form-control {
+        font-size: 16px !important; /* Force la taille sur mobile */
+      }
+    }
+    .form-control:focus {
+      border-color: #a29bfe;
+      box-shadow: 0 0 0 0.25rem rgba(162, 155, 254, 0.25);
+    }
+    .btn-primary {
+      background: linear-gradient(to right, #6c5ce7, #a29bfe);
+      border: none;
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+      font-size: 16px; /* Taille de police assurée */
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 7px 20px rgba(108, 92, 231, 0.3);
+    }
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+    .divider {
+      margin: 2rem 0;
+      text-align: center;
+      position: relative;
+    }
+    .divider:before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(to right, transparent, #dfe6e9, transparent);
+      z-index: 1;
+    }
+    .divider span {
+      display: inline-block;
+      padding: 0 15px;
+      background: white;
+      position: relative;
+      z-index: 2;
+      color: #636e72;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    .contact-links {
+      margin-top: 1.5rem;
+    }
+    .contact-links h5 {
+      color: #2d3436;
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+    }
+    .contact-links h5 i {
+      margin-right: 10px;
+      background: linear-gradient(to right, #6c5ce7, #a29bfe);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
     }
     .contact-links a {
-      display: block;
-      margin: 0.5rem 0;
-      font-size: 1.1rem;
-      color: #212529;
+      display: flex;
+      align-items: center;
+      margin: 1rem 0;
+      padding: 12px 15px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      color: #2d3436;
       text-decoration: none;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+      font-size: 16px; /* Taille de police assurée */
+    }
+    .contact-links a:hover {
+      background: #f1f3f9;
+      transform: translateX(5px);
+      border-left: 4px solid #6c5ce7;
     }
     .contact-links i {
-      color: #0d6efd;
-      width: 25px;
+      font-size: 1.2rem;
+      width: 30px;
+      transition: all 0.3s;
+    }
+    .contact-links a:nth-child(1) i { color: #00b894; }
+    .contact-links a:nth-child(2) i { color: #25D366; }
+    .contact-links a:nth-child(3) i { color: #d63031; }
+    .contact-links a:nth-child(4) i { color: #0088cc; }
+    .alert {
+      border-radius: 10px;
+      padding: 12px 15px;
+      border-left: 4px solid;
+      font-size: 16px; /* Taille de police assurée */
+    }
+    .alert-success {
+      border-left-color: #00b894;
+      background-color: rgba(0, 184, 148, 0.1);
+    }
+    .alert-danger {
+      border-left-color: #d63031;
+      background-color: rgba(214, 48, 49, 0.1);
+    }
+    
+    /* Correction spécifique pour iOS */
+    @supports (-webkit-touch-callout: none) {
+      input, textarea {
+        font-size: 16px !important;
+      }
     }
   </style>
 </head>
 <body>
 
-<div class="contact-card mt-5">
-  <h3 class="text-center mb-4">📬 Laissez-nous un message</h3>
+<div class="contact-card">
+  <div class="contact-header">
+    <h3><i class="fas fa-paper-plane"></i> Laissez-nous un message</h3>
+  </div>
 
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
@@ -42,21 +199,25 @@
   {% endwith %}
 
   <form method="POST" action="/contact">
-    <div class="mb-3">
+    <div class="mb-4">
       <label for="nom" class="form-label">Nom ou pseudo</label>
       <input type="text" class="form-control" id="nom" name="nom" required>
     </div>
-    <div class="mb-3">
+    <div class="mb-4">
       <label for="message" class="form-label">Votre message</label>
       <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
     </div>
-    <button type="submit" class="btn btn-primary w-100">📨 Envoyer</button>
+    <button type="submit" class="btn btn-primary w-100">
+      <i class="fas fa-paper-plane me-2"></i> Envoyer le message
+    </button>
   </form>
 
-  <hr class="my-4">
+  <div class="divider">
+    <span>OU contactez-moi directement</span>
+  </div>
 
   <div class="contact-links">
-    <h5 class="mb-3">📞 Contacter le développeur</h5>
+    <h5><i class="fas fa-address-book"></i>Mes coordonnées</h5>
     <a href="tel:+261346117893"><i class="fas fa-phone"></i> +261 34 61 17 893</a>
     <a href="https://wa.me/261346117893" target="_blank"><i class="fab fa-whatsapp"></i> 034 61 17 893</a>
     <a href="mailto:julientsila@gmail.com"><i class="fas fa-envelope"></i> julientsila@gmail.com</a>
