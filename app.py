@@ -4,7 +4,7 @@ import pandas as pd
 import gspread
 import requests
 import random
-from flask import Flask, session, request, redirect, url_for, render_template, abort, flash, send_from_directory
+from flask import Flask, session, request, redirect, url_for, render_template, abort, flash, send_from_directory, Response
 from flask_mail import Mail, Message
 from datetime import datetime, timedelta
 from oauth2client.service_account import ServiceAccountCredentials
@@ -319,7 +319,15 @@ def debug_static():
 
 @app.route("/sitemap.xml")
 def sitemap():
-    return send_from_directory("static", "sitemap.xml", mimetype="application/xml")
+    sitemap_xml = """<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://flask-app-julien.onrender.com/</loc><priority>1.0</priority></url>
+  <url><loc>https://flask-app-julien.onrender.com/login</loc><priority>0.9</priority></url>
+  <url><loc>https://flask-app-julien.onrender.com/contact</loc><priority>0.7</priority></url>
+  <url><loc>https://flask-app-julien.onrender.com/communaute</loc><priority>0.6</priority></url>
+</urlset>
+"""
+    return Response(sitemap_xml, mimetype='application/xml')
 
 @app.route('/robots.txt')
 def robots():
