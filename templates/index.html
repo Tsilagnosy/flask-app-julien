@@ -35,20 +35,16 @@
     }
     
     body {
-      background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-mid), var(--bg-gradient-end));
-      color: var(--text-light);
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      line-height: 1.6;
-      min-height: 100vh;
-      padding: 2rem 1rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-rendering: optimizeLegibility;
-      -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
-    }
+      margin: 0;
+    padding: 0;
+    background-image: url("{{ url_for('static', filename='images/fond_site.png') }}");
+    background-size: cover;         /* couvre tout l'écran */
+    background-repeat: no-repeat;   /* pas de répétition */
+    background-position: center;    /* centré */
+    background-attachment: fixed;   /* effet de défilement paralaxe */
+    font-family: "Segoe UI", sans-serif;
+    color:#white;                   /* si ton image est foncée */
+  }
     
     .container {
       max-width: 800px;
@@ -165,10 +161,25 @@
         font-size: 1.5rem;
       }
     }
+
+  .contenu {
+    backdrop-filter: blur(3px);     /* lisibilité du texte */
+    background-color: rgba(0, 0, 0, 0.4); /* couche sombre légère */
+    padding: 30px;
+    border-radius: 8px;
+    max-width: 800px;
+    margin: auto;
+    margin-top: 60px;
+  }
   </style>
   <meta name="google-site-verification" content="BJpSxCUHUrD-bKUA2tKV4I5FiNooVIfxH5QBBk17nm0" />
 </head>
 <body>
+  <div class="contenu">
+    <h1>Bienvenue sur le portail !</h1>
+    <p>Explore notre communauté et toutes les fonctionnalités du site 🚀</p>
+    <!-- Tu peux ajouter d'autres blocs ici -->
+  </div>
   <div class="container">
     <header>
       <h1><span class="emoji">🚀</span> Félicitations pour votre visite !</h1>
