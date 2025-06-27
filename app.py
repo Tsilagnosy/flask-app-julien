@@ -300,8 +300,10 @@ def contact():
         except Exception as e:
             flash(f"⚠️ Erreur réseau : {e}", "danger")
 
-        return render_template("contact.html")
+        return redirect(url_for("contact"))  # 🔁 redirige après POST pour éviter re-post en refresh
 
+    # 🔽 Retour pour requêtes GET (simple visite de la page)
+    return render_template("contact.html")
 # 🧪 --- ROUTES ANNEXES ---
 @app.route('/communaute')
 def communaute():
