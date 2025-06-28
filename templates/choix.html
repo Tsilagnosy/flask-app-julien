@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choix utilisateur</title>
+    <style>
+        :root {
+            --primary-color: #6c5ce7;
+            --secondary-color: #a29bfe;
+            --accent-color: #00cec9;
+            --text-color: #2d3436;
+            --light-bg: #f5f6fa;
+            --card-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-color);
+            padding: 20px;
+        }
+
+        .welcome-container {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        h2 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .username {
+            color: var(--accent-color);
+            font-weight: 700;
+        }
+
+        .options-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 25px;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .option-card {
+            background: white;
+            border-radius: 16px;
+            padding: 0;
+            width: 280px;
+            height: 180px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+            border: none;
+        }
+
+        .option-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .option-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--primary-color);
+            transition: var(--transition);
+        }
+
+        .option-card:hover::before {
+            height: 8px;
+            background: var(--accent-color);
+        }
+
+        .option-icon {
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            transition: var(--transition);
+        }
+
+        .option-card:hover .option-icon {
+            transform: scale(1.1);
+            color: var(--accent-color);
+        }
+
+        .option-text {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: var(--text-color);
+            transition: var(--transition);
+        }
+
+        .option-card:hover .option-text {
+            color: var(--primary-color);
+        }
+
+        form {
+            width: 100%;
+            height: 100%;
+            display: flex;
+        }
+
+        button[type="submit"] {
+            background: transparent;
+            border: none;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .options-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .option-card {
+                width: 100%;
+                max-width: 350px;
+            }
+            
+            h2 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="welcome-container">
+        <h2>Bienvenue <span class="username">{{ session['username'] }}</span></h2>
+    </div>
+
+    <div class="options-container">
+        <form action="{{ url_for('voir_liste') }}" method="get">
+            <button type="submit" class="option-card">
+                <div class="option-icon">📄</div>
+                <div class="option-text">Voir les fruits enregistrés</div>
+            </button>
+        </form>
+
+        <form action="{{ url_for('saisie') }}" method="get">
+            <button type="submit" class="option-card">
+                <div class="option-icon">➕</div>
+                <div class="option-text">Entrer de nouveaux fruits</div>
+            </button>
+        </form>
+    </div>
+</body>
+</html>
