@@ -14,7 +14,6 @@ from db import inserer_utilisateur, verifier_credentiels
 from dotenv import load_dotenv
 load_dotenv()
 
-
 # 📦 --- CONFIGURATION ---
 SCOPE = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
 SHEET_ID = "1hLPKx-HIfAmQIcePC_owhEklo5Bd-BXviqxQvCO-kMc"
@@ -25,11 +24,7 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET", "clé-temporaire-par-défaut")
 app.config["SESSION_COOKIE_SECURE"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-#Route principal
-@app.route('/')
-def accueil():
-    return render_template('index.html')
-    
+
 # 📧 --- CONFIGURATION FLASK-MAIL ---
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
@@ -38,6 +33,10 @@ app.config['MAIL_USERNAME'] = 'alexcardosydonie@gmail.com'
 app.config['MAIL_PASSWORD'] = 'vysl egbx ybpd ecjr'
 app.config['MAIL_DEFAULT_SENDER'] = 'alexcardosydonie@gmail.com'
 mail = Mail(app)
+
+@app.route('/')
+def accueil():
+    return render_template('index.html')
 
 # 🎲 --- GÉNÉRATION CODE DE VALIDATION ---
 def generate_validation_code():
@@ -52,7 +51,6 @@ def envoyer_code_par_mail(destinataire, code, nom):
             body=f"Bonjour {nom},\n\nVoici votre code : {code}"
         )
         mail.send(msg)
-        print("✅ Code envoyé par mail")
     except Exception as e:
         print(f"❌ Erreur email : {e}")
 
@@ -72,23 +70,16 @@ def envoyer_code_par_telegram(chat_id, code):
     }
 
     try:
-        response = requests.post(url, data=data)
-        if response.ok:
-            print("✅ Code envoyé sur Telegram")
-        else:
-            print(f"❌ Échec : {response.status_code} – {response.text}")
+        requests.post(url, data=data)
     except Exception as e:
         print(f"❌ Exception Telegram : {e}")
 
-# 🧾 --- PAGE CRÉATION DE COMPTE ---
 @app.route('/create_account', methods=['GET', 'POST'])
 def create_account():
     if request.method == 'POST':
         username = request.form.get('nom', '').strip()
         email = request.form.get('email', '').strip()
         telegram = request.form.get('telegram', '').strip()
-
-        # 🔐 Récupération et confirmation du mot de passe
         password = request.form.get('password', '').strip()
         confirm_password = request.form.get('confirm_password', '').strip()
 
@@ -96,20 +87,19 @@ def create_account():
             flash("⚠️ Les mots de passe ne correspondent pas.", "danger")
             return redirect(url_for('create_account'))
 
-        # 🔒 Hachage du mot de passe
         hashed_password = generate_password_hash(password)
         session['pending_password'] = hashed_password
 
-        # 💾 Stockage temporaire des infos d'inscription
         code = generate_validation_code()
-        session['validation_code'] = code
-        session['code_start_time'] = datetime.utcnow().isoformat()
-        session['attempts'] = 0
-        session['pending_username'] = username
-        session['email'] = email
-        session['telegram'] = telegram
+        session.update({
+            'validation_code': code,
+            'code_start_time': datetime.utcnow().isoformat(),
+            'attempts': 0,
+            'pending_username': username,
+            'email': email,
+            'telegram': telegram
+        })
 
-        # 📤 Envoi du code par e-mail ou Telegram
         if email:
             envoyer_code_par_mail(email, code, username)
         elif telegram:
@@ -122,7 +112,6 @@ def create_account():
 
     return render_template('create_account.html')
 
-# ✅ --- PAGE VÉRIFICATION DE CODE ---
 @app.route('/verify', methods=['GET', 'POST'])
 def verify():
     code_attendu = session.get('validation_code')
@@ -151,35 +140,31 @@ def verify():
 
         code_saisi = request.form.get('code', '').strip()
         if code_saisi == code_attendu:
-            # ✅ Récupérer données finales de la session
             username = session.pop('pending_username')
             email = session.pop('email', None)
             telegram = session.pop('telegram', None)
             hashed_password = session.pop('pending_password')
 
-            # 🧾 Insertion dans MongoDB
             inserer_utilisateur({
-    "username": username,
-    "email": email,
-    "telegram": telegram,
-    "password": hashed_password,
-    "via": "email" if email else "telegram"
-})
+                "username": username,
+                "email": email,
+                "telegram": telegram,
+                "password": hashed_password,
+                "via": "email" if email else "telegram"
+            })
 
-            # 🔐 Connexion utilisateur et nettoyage
             session['username'] = username
             session.pop('validation_code', None)
             session.pop('code_start_time', None)
             session.pop('attempts', None)
 
-            return redirect(url_for('saisie'))
+            return redirect(url_for('choix'))
         else:
             flash(f"❌ Code incorrect ({session['attempts']} / 5)", "warning")
             return redirect(url_for('verify'))
 
     return render_template('verify.html')
 
-# 🔑 --- PAGE D'ACCUEIL LOGIN ---
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -195,33 +180,46 @@ def login():
         if user:
             session['username'] = user['username']
             flash("✅ Connexion réussie", "success")
-            return redirect(url_for('saisie'))
+            return redirect(url_for('choix'))
         else:
             flash("❌ Utilisateur inconnu ou mot de passe incorrect. Pensez à vous inscrire.", "danger")
             return redirect(url_for('login'))
 
     return render_template('login.html')
-    
-# 📥 --- PAGE DE SAISIE PROTÉGÉE ---
+
+@app.route('/choix')
+def choix():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    return render_template('choix.html')
+
+@app.route('/voir_liste')
+def voir_liste():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    try:
+        creds_dict = json.loads(os.environ["GOOGLE_CREDENTIALS_JSON"])
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, SCOPE)
+        client = gspread.authorize(creds)
+        sheet = client.open_by_key(SHEET_ID).worksheet("Donnees_Site_Users")
+        records = sheet.get_all_records()
+    except Exception as e:
+        print("⚠️ Erreur lecture Google Sheets :", e)
+        records = []
+
+    return render_template('liste.html', records=records)
+
 @app.route('/saisie', methods=['GET', 'POST'])
 def saisie():
     if 'username' not in session:
         return redirect(url_for('login'))
 
     if request.method == 'POST':
-        data = {
-            'nom': request.form.get('nom'),
-            'cell': request.form.get('cell'),
-            'numero': request.form.get('numero'),
-            'fruit': request.form.get('fruit'),
-            'num_fruit': request.form.get('num_fruit'),
-            'adresse': request.form.get('adresse'),
-            'occupation': request.form.get('occupation'),
-            'Fotoana': request.form.get('Fotoana'),
-            'gender': request.form.get('gender'),
-            'dob': request.form.get('dob'),
-            'religion': request.form.get('religion')
-        }
+        data = {key: request.form.get(key) for key in [
+            'nom', 'cell', 'numero', 'fruit', 'num_fruit',
+            'adresse', 'occupation', 'Fotoana', 'gender', 'dob', 'religion'
+        ]}
 
         username = session['username']
         file_path = os.path.join(DATA_FOLDER, f"{username}.xlsx")
@@ -241,7 +239,6 @@ def saisie():
             creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, SCOPE)
             client = gspread.authorize(creds)
             sheet = client.open_by_key(SHEET_ID).worksheet("Donnees_Site_Users")
-
             row = [
                 data['nom'], data['cell'], data['numero'], data['fruit'],
                 data['num_fruit'], data['adresse'], data['occupation'],
@@ -254,7 +251,7 @@ def saisie():
         return redirect(url_for('success'))
 
     return render_template('saisie.html')
-
+    
 @app.route('/success')
 def success():
     if 'username' not in session:
@@ -266,7 +263,6 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
-# 📨 --- PAGE CONTACT AVEC ENVOI TELEGRAM ---
 @app.route("/contact", methods=["GET", "POST"])
 def contact():
     if request.method == "POST":
@@ -300,11 +296,10 @@ def contact():
         except Exception as e:
             flash(f"⚠️ Erreur réseau : {e}", "danger")
 
-        return redirect(url_for("contact"))  # 🔁 redirige après POST pour éviter re-post en refresh
+        return redirect(url_for("contact"))
 
-    # 🔽 Retour pour requêtes GET (simple visite de la page)
     return render_template("contact.html")
-# 🧪 --- ROUTES ANNEXES ---
+
 @app.route('/communaute')
 def communaute():
     return redirect(url_for('login'))
@@ -346,8 +341,7 @@ def trigger_backup():
     os.system("python send_backups.py")
     return "📤 Backup déclenché avec succès", 200
 
-# ▶️ --- LANCEMENT LOCAL ---
+# ▶️ Lancement
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 10000))
     app.run(host='0.0.0.0', port=port)
-
