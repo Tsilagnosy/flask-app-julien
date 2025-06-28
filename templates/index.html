@@ -11,7 +11,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   
   <!-- Google Fonts - Modern Font Stack -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:wght@500;700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <!-- Favicon -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
@@ -20,12 +23,16 @@
     :root {
       --primary-color: #00e0ff;
       --primary-dark: #00b4cc;
+      --secondary-color: #ff7b00;
       --bg-gradient-start: #0d1b2a;
       --bg-gradient-mid: #1b263b;
       --bg-gradient-end: #415a77;
       --text-light: #f8f9fa;
       --text-muted: #dee2e6;
       --transition-speed: 0.3s;
+      --menu-height: 85px;
+      --content-padding: 30px;
+      --glass-effect: rgba(255, 255, 255, 0.05);
     }
     
     * {
@@ -40,25 +47,135 @@
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
       line-height: 1.6;
       min-height: 100vh;
-      padding: 2rem 1rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      padding-top: var(--menu-height);
       text-rendering: optimizeLegibility;
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
     }
     
+    /* Navigation Bar */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: var(--menu-height);
+      background: rgba(13, 27, 42, 0.9);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 5%;
+      z-index: 1000;
+      box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .logo i {
+      font-size: 1.8rem;
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 30px;
+    }
+    
+    .nav-links a {
+      color: var(--text-light);
+      text-decoration: none;
+      font-weight: 500;
+      position: relative;
+      transition: color var(--transition-speed);
+    }
+    
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--primary-color);
+      transition: width var(--transition-speed);
+    }
+    
+    .nav-links a:hover {
+      color: var(--primary-color);
+    }
+    
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+    
+    .dropdown {
+      position: relative;
+    }
+    
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(27, 38, 59, 0.95);
+      backdrop-filter: blur(15px);
+      min-width: 200px;
+      border-radius: 8px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 0.3s, visibility 0.3s;
+    }
+    
+    .dropdown:hover .dropdown-content {
+      display: block;
+      opacity: 1;
+    }
+    
+    .dropdown-content a {
+      color: var(--text-light);
+      padding: 12px 20px;
+      display: block;
+      transition: background-color var(--transition-speed);
+    }
+    
+    .dropdown-content a:hover {
+      background-color: rgba(0, 224, 255, 0.1);
+      color: var(--primary-color);
+    }
+    
+    .dropdown-content a i {
+      margin-right: 10px;
+      width: 20px;
+      text-align: center;
+    }
+    
+    /* Main Content */
     .container {
-      max-width: 800px;
+      max-width: 900px;
       margin: 0 auto;
-      padding: 0 1.5rem;
+      padding: 3rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     
     header {
-      margin-bottom: 3rem;
+      margin-bottom: 2rem;
       animation: fadeInDown 0.8s ease-out;
+      text-align: center;
     }
     
     h1 {
@@ -87,20 +204,90 @@
     p:nth-child(4) { animation-delay: 0.6s; }
     p:nth-child(5) { animation-delay: 0.8s; }
     
-    .footer {
-      margin-top: 3rem;
-      font-style: italic;
+    /* Contact Section */
+    .contact-section {
+      width: 100%;
+      margin: 4rem 0;
+      padding: 2.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      animation: fadeIn 1s ease-out;
+    }
+    
+    .contact-title {
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+      color: var(--primary-color);
+      text-align: center;
+      font-weight: 600;
+    }
+    
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+    
+    .contact-card {
+      background: rgba(0, 180, 204, 0.1);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+      border: 1px solid rgba(0, 224, 255, 0.1);
+    }
+    
+    .contact-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 224, 255, 0.1);
+      background: rgba(0, 180, 204, 0.15);
+    }
+    
+    .contact-card i {
+      font-size: 1.8rem;
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+    }
+    
+    .contact-card h3 {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+      color: var(--text-light);
+    }
+    
+    .contact-card p {
+      font-size: 1rem;
+      text-align: left;
+      margin-bottom: 0;
       color: var(--text-muted);
-      opacity: 0.8;
-      font-size: 0.9rem;
-      animation: fadeIn 1.5s ease-out;
+    }
+    
+    .contact-card a {
+      color: var(--primary-color);
+      text-decoration: none;
+      transition: color var(--transition-speed);
+    }
+    
+    .contact-card a:hover {
+      color: var(--secondary-color);
+      text-decoration: underline;
+    }
+    
+    /* CTA Button */
+    .cta-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 2rem;
     }
     
     .cta-button {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      margin-top: 3rem;
+      margin-top: 1rem;
       width: 5.5rem;
       height: 5.5rem;
       background-color: var(--primary-color);
@@ -120,6 +307,26 @@
       transform: translateY(-3px);
       box-shadow: 0 6px 20px rgba(0, 180, 204, 0.4);
       outline: none;
+    }
+    
+    .cta-label {
+      margin-top: 1rem;
+      font-size: 1.1rem;
+      color: var(--text-muted);
+    }
+    
+    /* Footer */
+    .footer {
+      margin-top: 4rem;
+      font-style: italic;
+      color: var(--text-muted);
+      opacity: 0.8;
+      font-size: 0.9rem;
+      animation: fadeIn 1.5s ease-out;
+      text-align: center;
+      padding: 1.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      width: 100%;
     }
     
     /* Animations */
@@ -147,16 +354,24 @@
     
     /* Responsive adjustments */
     @media (max-width: 768px) {
-      body {
-        padding: 1.5rem 1rem;
+      .navbar {
+        padding: 0 2rem;
+      }
+      
+      .nav-links {
+        gap: 15px;
       }
       
       .container {
-        padding: 0 1rem;
+        padding: 2rem 1rem;
       }
       
-      h1 {
-        margin-bottom: 1rem;
+      .contact-section {
+        padding: 1.5rem;
+      }
+      
+      .contact-grid {
+        grid-template-columns: 1fr;
       }
       
       .cta-button {
@@ -165,10 +380,53 @@
         font-size: 1.5rem;
       }
     }
+    
+    @media (max-width: 480px) {
+      .navbar {
+        flex-direction: column;
+        height: auto;
+        padding: 1rem;
+        background-color: rgb(255, 165, 100);
+      }
+      
+      .nav-links {
+        margin-top: 1rem;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      
+      .dropdown-content {
+        background-color:rgb(255, 165, 0) ;
+        left: 0;
+        transform: translateX(0);
+      }
+    }
   </style>
   <meta name="google-site-verification" content="BJpSxCUHUrD-bKUA2tKV4I5FiNooVIfxH5QBBk17nm0" />
 </head>
 <body>
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="logo">
+      <i class="fas fa-rocket"></i>
+      <span>Innovation Numérique</span>
+    </div>
+    
+    <div class="nav-links">
+      <a href="#">Accueil</a>
+      
+      <div class="dropdown">
+        <a href="#">Menu <i class="fas fa-chevron-down"></i></a>
+        <div class="dropdown-content">
+          <a href="#"><i class="fas fa-home"></i> Accueil</a>
+          <a href="#contact"><i class="fas fa-envelope"></i> Contact</a>
+          <a href="{{ url_for('communaute') }}"><i class="fas fa-users"></i> Communauté</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+  
+  <!-- Main Content -->
   <div class="container">
     <header>
       <h1><span class="emoji">🚀</span> Félicitations pour votre visite !</h1>
@@ -190,15 +448,45 @@
       <p>
         L'identité du développeur reste volontairement mystérieuse pour le moment. Laissez-vous guider par l'énergie du projet et soyez les bienvenus dans cette communauté en devenir.
       </p>
+      
       <p>
-    Cette plateforme a pour but de rassembler des membres autour d’une vision commune :
-    <strong>partage, entraide, projets collaboratifset innovation.</strong> 
-        </p>
-      <button  class="cta-button" onclick="window.location.href='{{ url_for('communaute') }}'">🌎</button>Rejoindre La Communauté 
+        Cette plateforme a pour but de rassembler des membres autour d'une vision commune :
+        <strong>partage, entraide, projets collaboratifs et innovation.</strong> 
+      </p>
+      
+      <div class="cta-container">
+        <button class="cta-button" onclick="window.location.href='{{ url_for('communaute') }}'">🌎</button>
+        <span class="cta-label">Rejoindre La Communauté</span>
+      </div>
+      
+      <!-- Contact Section -->
+      <section id="contact" class="contact-section">
+        <h2 class="contact-title"><i class="fas fa-paper-plane"></i> Contactez-nous</h2>
+        
+        <div class="contact-grid">
+          <div class="contact-card">
+            <i class="fas fa-envelope"></i>
+            <h3>Email</h3>
+            <p><a href="mailto:julientsila@gmail.com">julientsila@gmail.com</a></p>
+          </div>
+          
+          <div class="contact-card">
+            <i class="fas fa-map-marker-alt"></i>
+            <h3>Localisation</h3>
+            <p>Majunga, Tsaramandroso</p>
+          </div>
+          
+          <div class="contact-card">
+            <i class="fas fa-clock"></i>
+            <h3>Disponibilité</h3>
+            <p>Lundi - Vendredi<br>9h - 18h</p>
+          </div>
+        </div>
+      </section>
     </main>
     
     <footer class="footer">
-      Le meilleur est encore à venir...
+      Le meilleur est encore à venir... © 2025 Innovation Numérique
     </footer>
   </div>
   
@@ -215,8 +503,18 @@
         });
       }, { threshold: 0.1 });
       
-      document.querySelectorAll('p').forEach(p => {
-        observer.observe(p);
+      document.querySelectorAll('p, .contact-card').forEach(el => {
+        observer.observe(el);
+      });
+      
+      // Smooth scrolling pour les ancres
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+          e.preventDefault();
+          document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+          });
+        });
       });
     });
   </script>
