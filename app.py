@@ -198,41 +198,22 @@ def login():
 
         if user:
             session['username'] = user['username']
-            flash("✅ Connexion réussie", "success")
-            return redirect(url_for('choix'))
-        else:
-            flash("❌ Utilisateur inconnu ou mot de passe incorrect. Pensez à vous inscrire.", "danger")
-            return redirect(url_for('login'))
-
-    return render_template('login.html')@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form.get('username', '').strip()
-        password = request.form.get('password', '').strip()
-
-        if not username or not password:
-            flash("Merci de remplir tous les champs.", "warning")
-            return redirect(url_for('login'))
-
-        # Vérification des identifiants
-        user = verifier_credentiels(username, password, check_password_hash)
-
-        if user:
-            session['username'] = user['username']
-            session['is_admin'] = user.get('admin', False)  # True si admin, sinon False
-
+            session['is_admin'] = user.get('admin', False)
             flash("✅ Connexion réussie", "success")
 
-            # Redirection spécifique si admin
             if user.get('admin'):
                 return redirect(url_for('admin.admin_dashboard'))
             else:
-                return redirect(url_for('choix'))
-        else:
-            flash("❌ Utilisateur inconnu ou mot de passe incorrect. Pensez à vous inscrire.", "danger")
-            return redirect(url_for('login'))
+                return redirect(url_for('formulaire'))
+
+        flash("❌ Identifiants incorrects.", "danger")
+        return redirect(url_for('login'))
 
     return render_template('login.html')
+    
+    
+@app.route('/formulaire', methods=['GET', 'POST'])
+def formulaire():
     if 'username' not in session:
         return redirect(url_for('login'))
 
@@ -271,7 +252,7 @@ def login():
 
         return redirect(url_for('success'))
 
-    return render_template('saisie.html')
+    return render_template('formulaire.html')
     
 @app.route('/success')
 def success():
