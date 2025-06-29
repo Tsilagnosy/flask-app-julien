@@ -35,6 +35,7 @@ app.config['MAIL_PASSWORD'] = 'vysl egbx ybpd ecjr'
 app.config['MAIL_DEFAULT_SENDER'] = 'alexcardosydonie@gmail.com'
 mail = Mail(app)
 
+# PAGE D'ACCEUIL BRO 
 @app.route('/')
 def accueil():
     return render_template('index.html')
@@ -127,7 +128,8 @@ def saisie():
         return redirect(url_for('success'))
 
     return render_template('saisie.html')
-
+    
+# LISTE VOANKAZO ENREGISTRÉS 
 @app.route('/voir_liste')
 def voir_liste():
     if 'username' not in session:
@@ -145,7 +147,7 @@ def voir_liste():
 
     return render_template('liste.html', records=records)
     
-
+# CREATION DE COMPTE UTILISATEUR'
 @app.route('/create_account', methods=['GET', 'POST'])
 def create_account():
     if request.method == 'POST':
@@ -184,6 +186,7 @@ def create_account():
 
     return render_template('create_account.html')
 
+# Page de VERIFICATION DE COMPTE 
 @app.route('/verify', methods=['GET', 'POST'])
 def verify():
     code_attendu = session.get('validation_code')
@@ -197,7 +200,7 @@ def verify():
     if request.method == 'POST':
         now = datetime.utcnow()
         creation_time = datetime.fromisoformat(start_time)
-        delai = timedelta(minutes=1)
+        delai = timedelta(minutes=2)
 
         if now - creation_time > delai:
             session.clear()
@@ -285,13 +288,8 @@ def login():
         return redirect(url_for('login'))
 
     return render_template('login.html')
-    
-    
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect(url_for('login'))
-
+        
+#CONTACTER L'ADMIN'
 @app.route("/contact", methods=["GET", "POST"])
 def contact():
     if request.method == "POST":
@@ -328,12 +326,6 @@ def contact():
         return redirect(url_for("contact"))
 
     return render_template("contact.html")
-
-@app.route('/choix')
-def choix():
-    if 'username' not in session:
-        return redirect(url_for('login'))
-    return render_template('choix.html')
     
     
 @app.route('/success')
@@ -342,8 +334,22 @@ def success():
         return redirect(url_for('login'))
     return render_template('success.html')
 
+# Page de CONNEXION
 @app.route('/communaute')
 def communaute():
+    return redirect(url_for('login'))
+    
+# CHOIX POUR UTILISATEURS
+@app.route('/choix')
+def choix():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    return render_template('choix.html')
+    
+ # Route pour DECONNEXION  
+@app.route('/logout')
+def logout():
+    session.clear()
     return redirect(url_for('login'))
 
 @app.route('/google2b9208b1f9fa091c.html')

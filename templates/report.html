@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="mg">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voankazo Form</title>
+  <style>
+    :root {
+      --primary-color: #2c8a5a;
+      --secondary-color: #f8f9fa;
+      --accent-color: #ffc107;
+      --text-color: #343a40;
+      --light-gray: #e9ecef;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --sky-light: #e6f2ff;
+      --sky-medium: #cce0ff;
+      --sky-dark: #99c2ff;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: var(--text-color);
+      background: linear-gradient(135deg, var(--sky-light) 0%, #ffffff 100%);
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 15px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(5px);
+    }
+    
+    header {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--sky-dark) 100%);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    header::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.1"><path d="M30,30 Q35,20 40,30 T50,30 T60,30 T70,30 T80,30" fill="none" stroke="white" stroke-width="2"/></svg>');
+      opacity: 0.3;
+    }
+    
+    h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      position: relative;
+      z-index: 1;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+    
+    form {
+      padding: 20px;
+      background-color: transparent;
+    }
+    
+    fieldset {
+      border: 1px solid rgba(204, 224, 255, 0.8);
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      background-color: rgba(255, 255, 255, 0.7);
+      box-shadow: inset 0 0 10px rgba(204, 224, 255, 0.3);
+    }
+    
+    legend {
+      font-weight: bold;
+      color: var(--primary-color);
+      padding: 0 15px;
+      font-size: 1.1rem;
+      background: white;
+      border-radius: 20px;
+      border: 1px solid var(--sky-medium);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 15px;
+      font-weight: 500;
+    }
+    
+    input[type="text"],
+    input[type="tel"],
+    input[type="texte"],
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      margin-top: 5px;
+      border: 1px solid var(--sky-medium);
+      border-radius: 6px;
+      box-sizing: border-box;
+      transition: all 0.3s;
+      background-color: rgba(255, 255, 255, 0.8);
+      font-family: inherit;
+    }
+    
+    input[type="text"]:focus,
+    input[type="tel"]:focus,
+    input[type="texte"]:focus,
+    select:focus {
+      border-color: var(--primary-color);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(44, 138, 90, 0.2);
+      background-color: white;
+    }
+    
+    select {
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232c8a5a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 1em;
+    }
+    
+    .info-section {
+      background: linear-gradient(135deg, rgba(230, 242, 255, 0.7) 0%, rgba(255, 255, 255, 0.9) 100%);
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 20px;
+      border: 1px solid rgba(204, 224, 255, 0.5);
+    }
+    
+    h3 {
+      color: var(--primary-color);
+      margin-top: 0;
+      font-size: 1.2rem;
+    }
+    
+    ul {
+      padding-left: 20px;
+    }
+    
+    li {
+      margin-bottom: 8px;
+      position: relative;
+      padding-left: 15px;
+    }
+    
+    li::before {
+      content: "•";
+      color: var(--sky-dark);
+      font-size: 1.5em;
+      position: absolute;
+      left: -5px;
+      top: -3px;
+    }
+    
+    strong {
+      color: var(--primary-color);
+    }
+    
+    .footer {
+      text-align: center;
+      padding: 20px;
+      color: #6c757d;
+      font-size: 0.9rem;
+      background-color: rgba(255, 255, 255, 0.7);
+      border-top: 1px solid rgba(204, 224, 255, 0.5);
+    }
+    
+    .submit-btn {
+      background: linear-gradient(135deg, var(--primary-color) 0%, #3aa76d 100%);
+      color: white;
+      border: none;
+      padding: 14px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: bold;
+      display: block;
+      width: 100%;
+      transition: all 0.3s;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .submit-btn:hover {
+      background: linear-gradient(135deg, #237347 0%, #2c8a5a 100%);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      transform: translateY(-1px);
+    }
+    
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+    
+    @media (min-width: 768px) {
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      
+      body {
+        padding: 40px 20px;
+      }
+    }
+    
+    /* Nuages décoratifs */
+    .cloud {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.8;
+    }
+    
+    .cloud-1 {
+      width: 80px;
+      height: 30px;
+      top: 10px;
+      right: 50px;
+    }
+    
+    .cloud-1::before, .cloud-1::after {
+      content: '';
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+    }
+    
+    .cloud-1::before {
+      width: 30px;
+      height: 30px;
+      top: -15px;
+      left: 10px;
+    }
+    
+    .cloud-1::after {
+      width: 40px;
+      height: 40px;
+      top: -20px;
+      right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h2>🟢 FORMAT HO AN'IREO VOANKAZO MANOHY LESONA</h2>
+    </header>
+    
+    <form>
+      <fieldset>
+        <legend>☀️ Fampidirana</legend>
+        <div class="form-grid">
+          <label>
+            Team :
+            <input type="text" name="team" placeholder="ohatra: 04" required>
+          </label>
+          
+          <label>
+            BBS (anarana feno) :
+            <input type="text" name="bbs" placeholder="anarana feno ny voankazo" required>
+          </label>
+          
+          <label>
+            Sexe :
+            <input type="text" name="sexe" required>
+          </label>
+          
+          <label>
+            Tel :
+            <input type="tel" name="tel" required>
+          </label>
+          
+          <label>
+            Lesona natao :
+            <input type="text" name="lesona" required>
+          </label>
+          
+          <label>
+            Tree + Cell :
+            <input type="text" name="tree_cell" placeholder="Ohatra: LAHINIRIKO JULIEN -05" required>
+          </label>
+          
+          <label>
+            Contact Tree :
+            <input type="text" name="contact_tree">
+          </label>
+          
+          <label>
+            Catégorie :
+            <select name="categorie" required>
+              <option value="">--Misafidiana--</option>
+              <option value="A">A - tsy manana fahafahana 2fois/semaine</option>
+              <option value="B">B - mandehandeha be na ivelany Mahajanga</option>
+              <option value="C">C - tsy manana fitaovana (finday)</option>
+              <option value="D">D - mahafeno tsara ny fepetra</option>
+            </select>
+          </label>
+          
+          <label>
+            BBT nandray :
+            <input type="text" name="BBT" required>
+          </label>
+          
+          <label>
+            Fotoana manaraka (Date mazava) :
+            <input type="texte" name="next_date" placeholder="ohatra : Jeudi 09H" required>
+          </label>
+        </div>
+      </fieldset>
+      
+      <button type="submit" class="submit-btn">Handefa Tatitra</button>
+    </form>
+    
+    <div class="info-section">
+      <h3>✨ Fanazavana momba ny Catégorie :</h3>
+      <ul>
+        <li><strong>A</strong> : vonona hianatra fa tsy manana fahafahana 2fois/semaine</li>
+        <li><strong>B</strong> : vonona hianatra fa mandehandeha be na mijanona ivelan'i Mahajanga</li>
+        <li><strong>C</strong> : vonona hianatra fa tsy manana fitaovana fandraisana (finday)</li>
+        <li><strong>D</strong> : vonona hianatra sy mahafeno tsara ny fepetra rehetra</li>
+      </ul>
+    </div>
+    
+    <div class="footer">
+      <p>Ireto ny format ampiasaina manomboka izao koa andao hanaja izany tsara 🙏</p>
+      <p><em>Misaotra tompoko</em> 🙏</p>
+    </div>
+  </div>
+</body>
+</html>
