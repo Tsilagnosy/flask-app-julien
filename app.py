@@ -204,33 +204,35 @@ def login():
             flash("❌ Utilisateur inconnu ou mot de passe incorrect. Pensez à vous inscrire.", "danger")
             return redirect(url_for('login'))
 
+    return render_template('login.html')@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '').strip()
+
+        if not username or not password:
+            flash("Merci de remplir tous les champs.", "warning")
+            return redirect(url_for('login'))
+
+        # Vérification des identifiants
+        user = verifier_credentiels(username, password, check_password_hash)
+
+        if user:
+            session['username'] = user['username']
+            session['is_admin'] = user.get('admin', False)  # True si admin, sinon False
+
+            flash("✅ Connexion réussie", "success")
+
+            # Redirection spécifique si admin
+            if user.get('admin'):
+                return redirect(url_for('admin.admin_dashboard'))
+            else:
+                return redirect(url_for('choix'))
+        else:
+            flash("❌ Utilisateur inconnu ou mot de passe incorrect. Pensez à vous inscrire.", "danger")
+            return redirect(url_for('login'))
+
     return render_template('login.html')
-
-@app.route('/choix')
-def choix():
-    if 'username' not in session:
-        return redirect(url_for('login'))
-    return render_template('choix.html')
-
-@app.route('/voir_liste')
-def voir_liste():
-    if 'username' not in session:
-        return redirect(url_for('login'))
-
-    try:
-        creds_dict = json.loads(os.environ["GOOGLE_CREDENTIALS_JSON"])
-        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, SCOPE)
-        client = gspread.authorize(creds)
-        sheet = client.open_by_key(SHEET_ID).worksheet("Donnees_Site_Users")
-        records = sheet.get_all_records()
-    except Exception as e:
-        print("⚠️ Erreur lecture Google Sheets :", e)
-        records = []
-
-    return render_template('liste.html', records=records)
-
-@app.route('/saisie', methods=['GET', 'POST'])
-def saisie():
     if 'username' not in session:
         return redirect(url_for('login'))
 
