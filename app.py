@@ -146,13 +146,9 @@ def verify():
             telegram = session.pop('telegram', None)
             hashed_password = session.pop('pending_password')
 
-            # 📌 [NOUVEAU] Signature de l'appareil (user-agent)
             signature = request.headers.get('User-Agent', 'Inconnu')
-
-            # 📌 [NOUVEAU] Date de création du compte
             creation_date = datetime.utcnow()
 
-            # 📌 [NOUVEAU] Localisation par IP publique
             try:
                 ip_info = requests.get("https://ipinfo.io").json()
                 localisation = f"{ip_info.get('city', 'Inconnu')}, {ip_info.get('country', 'Inconnu')}"
@@ -160,8 +156,8 @@ def verify():
                 print("⚠️ Erreur localisation :", e)
                 localisation = "Localisation inconnue"
 
-            # ✅ Insertion complète de l'utilisateur
-            inserer_utilisateur({
+            # Insertion de l'utilisateur
+            utilisateur = {
                 "username": username,
                 "email": email,
                 "telegram": telegram,
@@ -170,95 +166,27 @@ def verify():
                 "signature": signature,
                 "created_at": creation_date,
                 "location": localisation
-            })
+            }
 
+            inserer_utilisateur(utilisateur)
+
+            # Connexion en session
             session['username'] = username
+            session['is_admin'] = utilisateur.get('admin', False)  # utile pour HTML conditionnel
             session.pop('validation_code', None)
             session.pop('code_start_time', None)
             session.pop('attempts', None)
 
-            return redirect(url_for('choix'))
+            if utilisateur.get('admin'):
+                return redirect(url_for('admin.admin_dashboard'))
+            else:
+                return redirect(url_for('choix'))  # ou 'formulaire' si tu l’as renommé
+
         else:
             flash(f"❌ Code incorrect ({session['attempts']} / 5)", "warning")
             return redirect(url_for('verify'))
 
     return render_template('verify.html')
-    
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form.get('username', '').strip()
-        password = request.form.get('password', '').strip()
-
-        if not username or not password:
-            flash("Merci de remplir tous les champs.", "warning")
-            return redirect(url_for('login'))
-
-        user = verifier_credentiels(username, password, check_password_hash)
-
-        if user:
-            session['username'] = user['username']
-            session['is_admin'] = user.get('admin', False)
-            flash("✅ Connexion réussie", "success")
-
-            if user.get('admin'):
-                return redirect(url_for('admin.admin_dashboard'))
-            else:
-                return redirect(url_for('formulaire'))
-
-        flash("❌ Identifiants incorrects.", "danger")
-        return redirect(url_for('login'))
-
-    return render_template('login.html')
-    
-    
-@app.route('/formulaire', methods=['GET', 'POST'])
-def formulaire():
-    if 'username' not in session:
-        return redirect(url_for('login'))
-
-    if request.method == 'POST':
-        data = {key: request.form.get(key) for key in [
-            'nom', 'cell', 'numero', 'fruit', 'num_fruit',
-            'adresse', 'occupation', 'Fotoana', 'gender', 'dob', 'religion'
-        ]}
-
-        username = session['username']
-        file_path = os.path.join(DATA_FOLDER, f"{username}.xlsx")
-
-        if os.path.exists(file_path):
-            df = pd.read_excel(file_path)
-            if data['numero'] in df['numero'].astype(str).values:
-                return redirect(url_for('success'))
-            df = pd.concat([df, pd.DataFrame([data])], ignore_index=True)
-        else:
-            df = pd.DataFrame([data])
-
-        df.to_excel(file_path, index=False)
-
-        try:
-            creds_dict = json.loads(os.environ["GOOGLE_CREDENTIALS_JSON"])
-            creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, SCOPE)
-            client = gspread.authorize(creds)
-            sheet = client.open_by_key(SHEET_ID).worksheet("Donnees_Site_Users")
-            row = [
-                data['nom'], data['cell'], data['numero'], data['fruit'],
-                data['num_fruit'], data['adresse'], data['occupation'],
-                data['Fotoana'], data['gender'], data['dob'], data['religion']
-            ]
-            sheet.append_row(row)
-        except Exception as e:
-            print("⚠️ Erreur Google Sheets :", e)
-
-        return redirect(url_for('success'))
-
-    return render_template('formulaire.html')
-    
-@app.route('/success')
-def success():
-    if 'username' not in session:
-        return redirect(url_for('login'))
-    return render_template('success.html')
 
 @app.route('/logout')
 def logout():
