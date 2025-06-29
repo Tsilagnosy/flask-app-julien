@@ -75,6 +75,77 @@ def envoyer_code_par_telegram(chat_id, code):
     except Exception as e:
         print(f"❌ Exception Telegram : {e}")
 
+# 📥 --- PAGE DE SAISIE PROTÉGÉE ---
+@app.route('/saisie', methods=['GET', 'POST'])
+def saisie():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        data = {
+            'nom': request.form.get('nom'),
+            'cell': request.form.get('cell'),
+            'numero': request.form.get('numero'),
+            'fruit': request.form.get('fruit'),
+            'num_fruit': request.form.get('num_fruit'),
+            'adresse': request.form.get('adresse'),
+            'occupation': request.form.get('occupation'),
+            'Fotoana': request.form.get('Fotoana'),
+            'gender': request.form.get('gender'),
+            'dob': request.form.get('dob'),
+            'religion': request.form.get('religion')
+        }
+
+        username = session['username']
+        file_path = os.path.join(DATA_FOLDER, f"{username}.xlsx")
+
+        if os.path.exists(file_path):
+            df = pd.read_excel(file_path)
+            if data['numero'] in df['numero'].astype(str).values:
+                return redirect(url_for('success'))
+            df = pd.concat([df, pd.DataFrame([data])], ignore_index=True)
+        else:
+            df = pd.DataFrame([data])
+
+        df.to_excel(file_path, index=False)
+
+        try:
+            creds_dict = json.loads(os.environ["GOOGLE_CREDENTIALS_JSON"])
+            creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, SCOPE)
+            client = gspread.authorize(creds)
+            sheet = client.open_by_key(SHEET_ID).worksheet("Donnees_Site_Users")
+
+            row = [
+                data['nom'], data['cell'], data['numero'], data['fruit'],
+                data['num_fruit'], data['adresse'], data['occupation'],
+                data['Fotoana'], data['gender'], data['dob'], data['religion']
+            ]
+            sheet.append_row(row)
+        except Exception as e:
+            print("⚠️ Erreur Google Sheets :", e)
+
+        return redirect(url_for('success'))
+
+    return render_template('saisie.html')
+
+@app.route('/voir_liste')
+def voir_liste():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    try:
+        creds_dict = json.loads(os.environ["GOOGLE_CREDENTIALS_JSON"])
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, SCOPE)
+        client = gspread.authorize(creds)
+        sheet = client.open_by_key(SHEET_ID).worksheet("Donnees_Site_Users")
+        records = sheet.get_all_records()
+    except Exception as e:
+        print("⚠️ Erreur lecture Google Sheets :", e)
+        records = []
+
+    return render_template('liste.html', records=records)
+    
+
 @app.route('/create_account', methods=['GET', 'POST'])
 def create_account():
     if request.method == 'POST':
