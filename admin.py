@@ -1,64 +1,52 @@
-from flask import Blueprint, render_template, session, redirect, url_for
-from db import get_all_utilisateurs
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+from pymongo import MongoClient
+from functools import wraps
+import os
+from dotenv import load_dotenv
 
-admin_bp = Blueprint("admin", __name__)
+load_dotenv()
 
+admin_bp = Blueprint('admin', __name__)
+client = MongoClient(os.getenv("MONGO_URI"))
+db = client.get_default_database()
 
-"""
-    # Adaptation des données pour le rendu HTML
-    liste_utilisateurs = []
-    for u in utilisateurs:
-        liste_utilisateurs.append({
-            "username": u.get("username", "—"),
-            "email": u.get("email", None),
-            "telegram": u.get("telegram", None),
-            "date_inscription": u.get("date_inscription", "—"),
-            "active": u.get("active", True)  # True par défaut si le champ n'existe pas
-        })
+# 🔐 Décorateur pour restreindre l'accès aux administrateurs
+def admin_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        user = db.utilisateurs.find_one({"username": session.get('username')})
+        if not user or not user.get('admin'):
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return wrapper
 
-    return render_template("admin/dashboard.html", utilisateurs=liste_utilisateurs)
-    """
-@admin_bp.route("/admin")
+# 📊 Dashboard Admin (liste des utilisateurs)
+@admin_bp.route('/admin')
+@admin_required
 def admin_dashboard():
-    if not session.get("is_admin"):
-        return redirect(url_for("login"))
+    utilisateurs = list(db.utilisateurs.find())
+    return render_template('admin_dashboard.html', utilisateurs=utilisateurs)
 
-@admin_bp.route("/")
-def index():
-    return redirect(url_for("admin.admin_dashboard"))
-    # 🔽 Bloc temporaire pour test local
-    utilisateurs = [
-        {
-            "username": "julien_dev",
-            "email": "julien@example.com",
-            "telegram": None,
-            "date_inscription": "2025-06-27",
-            "active": True
-        },
-        {
-            "username": "invite42",
-            "email": None,
-            "telegram": "123456789",
-            "date_inscription": "2025-06-26",
-            "active": False
-        }
-    ]
+# 🗑️ Supprimer un utilisateur
+@admin_bp.route('/admin/supprimer/<username>')
+@admin_required
+def supprimer_utilisateur(username):
+    db.utilisateurs.delete_one({'username': username})
+    flash(f"✅ Utilisateur {username} supprimé.")
+    return redirect(url_for('admin.admin_dashboard'))
 
-    return render_template("admin/dashboard.html", utilisateurs=utilisateurs)
+# 🔒 Restreindre un utilisateur par signature
+@admin_bp.route('/admin/restreindre/<signature>')
+@admin_required
+def restreindre_acces(signature):
+    db.utilisateurs.update_many({'signature': signature}, {'$set': {'restreint': True}})
+    flash(f"⛔ Accès restreint pour signature : {signature}")
+    return redirect(url_for('admin.admin_dashboard'))
     
-if __name__ == "__main__":
-    from flask import Flask
-    import os
-
-    app = Flask(__name__)
-    app.secret_key = "test-secret"  # nécessaire pour la gestion des sessions
-
-    # Fausse session pour simuler un admin
-    @app.before_request
-    def simuler_admin():
-        from flask import session
-        session["is_admin"] = True
-
-    app.register_blueprint(admin_bp, url_prefix="/")  # ou autre préfixe unique si tu veux
-
-    app.run(debug=True)
+@admin_bp.route('/admin/reset_utilisateurs', methods=['POST'])
+@admin_required
+def reset_utilisateurs():
+    # Supprime tous les utilisateurs sauf ceux marqués admin=True
+    result = db.utilisateurs.delete_many({"admin": {"$ne": True}})
+    flash(f"🧼 {result.deleted_count} utilisateur(s) supprimé(s), les admins ont été conservés.", "info")
+    return redirect(url_for('admin.admin_dashboard'))

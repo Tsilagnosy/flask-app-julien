@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Liste des utilisateurs</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #166088;
+            --accent-color: #e63946;
+            --bg-color: #f8f9fa;
+            --card-color: #ffffff;
+            --text-color: #2d3436;
+            --border-color: #e0e0e0;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h2::before {
+            content: "👥";
+            font-size: 1.5rem;
+        }
+
+        .data-container {
+            background: var(--card-color);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            min-width: 800px;
+        }
+
+        thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 16px 20px;
+            text-align: left;
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            position: relative;
+            border: none !important;
+        }
+
+        th:not(:last-child)::after {
+            content: "";
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 60%;
+            width: 1px;
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        td {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border-color);
+            transition: var(--transition);
+            vertical-align: middle;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: rgba(74, 111, 165, 0.05);
+        }
+
+        tr:nth-child(even) {
+            background-color: rgba(245, 245, 245, 0.5);
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .delete-btn {
+            color: var(--accent-color);
+            background-color: rgba(230, 57, 70, 0.1);
+            border: 1px solid rgba(230, 57, 70, 0.2);
+        }
+
+        .delete-btn:hover {
+            background-color: rgba(230, 57, 70, 0.2);
+        }
+
+        .restrict-btn {
+            color: var(--secondary-color);
+            background-color: rgba(22, 96, 136, 0.1);
+            border: 1px solid rgba(22, 96, 136, 0.2);
+        }
+
+        .restrict-btn:hover {
+            background-color: rgba(22, 96, 136, 0.2);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.1rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .empty-state::before {
+            content: "😕";
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 15px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes rowEnter {
+            from { opacity: 0; transform: translateX(10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        tbody tr {
+            animation: rowEnter 0.4s ease-out forwards;
+        }
+
+        tbody tr:nth-child(1) { animation-delay: 0.1s; }
+        tbody tr:nth-child(2) { animation-delay: 0.2s; }
+        tbody tr:nth-child(3) { animation-delay: 0.3s; }
+        tbody tr:nth-child(n+4) { animation-delay: 0.4s; }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1.5rem;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+            
+            th, td {
+                padding: 12px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .actions {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .action-btn {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <h2>Liste des utilisateurs enregistrés</h2>
+        
+        {% if utilisateurs %}
+        <div class="data-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Email</th>
+                        <th>Telegram</th>
+                        <th>Signature</th>
+                        <th>Localisation</th>
+                        <th>Créé le</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in utilisateurs %}
+                    <tr>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.email or '<span class="empty-field">–</span>' }}</td>
+                        <td>{{ user.telegram or '<span class="empty-field">–</span>' }}</td>
+                        <td>{{ user.signature }}</td>
+                        <td>{{ user.location }}</td>
+                        <td>{{ user.created_at.strftime('%d/%m/%Y %H:%M') if user.created_at else '–' }}</td>
+                        <td>
+                            <div class="actions">
+                                <a href="{{ url_for('admin.supprimer_utilisateur', username=user.username) }}" 
+                                   class="action-btn delete-btn">
+                                   <i class="fas fa-trash-alt"></i> Supprimer
+                                </a>
+                                <a href="{{ url_for('admin.restreindre_acces', signature=user.signature) }}" 
+                                   class="action-btn restrict-btn">
+                                   <i class="fas fa-lock"></i> Restreindre
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <div class="empty-state">
+                <p>Aucun utilisateur enregistré</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Confirmation avant suppression
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    if (!confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
+                        e.preventDefault();
+                    }
+                });
+            });
+        });
+    </script>
+    <form method="POST" action="{{ url_for('admin.reset_utilisateurs') }}" onsubmit="return confirm('⚠️ Cette action supprimera tous les utilisateurs. Continuer ?')">
+    <button type="submit" style="background-color: #c62828; color: white; padding: 8px 16px; border: none; border-radius: 4px;">
+        🧨 Reset Utilisateurs
+    </button>
+</form>
+</body>
+</html>

@@ -4,6 +4,7 @@ import pandas as pd
 import gspread
 import requests
 import random
+from admin import admin_bp
 from flask import Flask, session, request, redirect, url_for, render_template, abort, flash, send_from_directory, Response
 from flask_mail import Mail, Message
 from datetime import datetime, timedelta
@@ -145,12 +146,30 @@ def verify():
             telegram = session.pop('telegram', None)
             hashed_password = session.pop('pending_password')
 
+            # 📌 [NOUVEAU] Signature de l'appareil (user-agent)
+            signature = request.headers.get('User-Agent', 'Inconnu')
+
+            # 📌 [NOUVEAU] Date de création du compte
+            creation_date = datetime.utcnow()
+
+            # 📌 [NOUVEAU] Localisation par IP publique
+            try:
+                ip_info = requests.get("https://ipinfo.io").json()
+                localisation = f"{ip_info.get('city', 'Inconnu')}, {ip_info.get('country', 'Inconnu')}"
+            except Exception as e:
+                print("⚠️ Erreur localisation :", e)
+                localisation = "Localisation inconnue"
+
+            # ✅ Insertion complète de l'utilisateur
             inserer_utilisateur({
                 "username": username,
                 "email": email,
                 "telegram": telegram,
                 "password": hashed_password,
-                "via": "email" if email else "telegram"
+                "via": "email" if email else "telegram",
+                "signature": signature,
+                "created_at": creation_date,
+                "location": localisation
             })
 
             session['username'] = username
@@ -164,7 +183,7 @@ def verify():
             return redirect(url_for('verify'))
 
     return render_template('verify.html')
-
+    
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -340,6 +359,8 @@ def trigger_backup():
         return abort(403, description="Clé de sécurité invalide")
     os.system("python send_backups.py")
     return "📤 Backup déclenché avec succès", 200
+
+app.register_blueprint(admin_bp)
 
 # ▶️ Lancement
 if __name__ == '__main__':
