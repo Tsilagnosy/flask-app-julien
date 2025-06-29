@@ -335,6 +335,13 @@ def choix():
         return redirect(url_for('login'))
     return render_template('choix.html')
     
+    
+@app.route('/success')
+def success():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    return render_template('success.html')
+
 @app.route('/communaute')
 def communaute():
     return redirect(url_for('login'))
