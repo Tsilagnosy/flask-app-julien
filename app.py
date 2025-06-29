@@ -188,6 +188,34 @@ def verify():
 
     return render_template('verify.html')
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '').strip()
+
+        if not username or not password:
+            flash("Merci de remplir tous les champs.", "warning")
+            return redirect(url_for('login'))
+
+        user = verifier_credentiels(username, password, check_password_hash)
+
+        if user:
+            session['username'] = user['username']
+            session['is_admin'] = user.get('admin', False)
+            flash("✅ Connexion réussie", "success")
+
+            if user.get('admin'):
+                return redirect(url_for('admin.admin_dashboard'))
+            else:
+                return redirect(url_for('choix'))  # ou 'formulaire'
+
+        flash("❌ Utilisateur inconnu ou mot de passe incorrect.", "danger")
+        return redirect(url_for('login'))
+
+    return render_template('login.html')
+    
+    
 @app.route('/logout')
 def logout():
     session.clear()
@@ -230,6 +258,12 @@ def contact():
 
     return render_template("contact.html")
 
+@app.route('/choix')
+def choix():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    return render_template('choix.html')
+    
 @app.route('/communaute')
 def communaute():
     return redirect(url_for('login'))
