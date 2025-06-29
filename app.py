@@ -345,7 +345,14 @@ def choix():
     if 'username' not in session:
         return redirect(url_for('login'))
     return render_template('choix.html')
-    
+ 
+# Redirection pour REPORT BBT 
+@app.route('/report')
+def report():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    return render_template('report.html')
+       
  # Route pour DECONNEXION  
 @app.route('/logout')
 def logout():
