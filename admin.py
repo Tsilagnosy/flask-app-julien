@@ -8,7 +8,7 @@ load_dotenv()
 
 admin_bp = Blueprint('admin', __name__)
 client = MongoClient(os.getenv("MONGO_URI"))
-db = client.get_default_database()
+db = client["Cluster0"]
 
 # 🔐 Décorateur pour restreindre l'accès aux administrateurs
 def admin_required(f):
