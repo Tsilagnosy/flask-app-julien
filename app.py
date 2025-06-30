@@ -341,6 +341,18 @@ def success():
 def communaute():
     return redirect(url_for('login'))
     
+# À Effacer dans 2min bro
+@app.route('/make_me_admin')
+def make_me_admin():
+    if 'username' in session:
+        db.utilisateurs.update_one(
+            {'username': session['username']},
+            {'$set': {'admin': True}}
+        )
+        return "✅ Tu es maintenant admin (temporairement). Supprime cette route vite !"
+    return redirect(url_for('login'))
+        
+ 
 # CHOIX POUR UTILISATEURS
 @app.route('/choix')
 def choix():
