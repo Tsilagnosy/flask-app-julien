@@ -414,7 +414,7 @@ def trigger_backup():
     os.system("python send_backups.py")
     return "📤 Backup déclenché avec succès", 200
 
-app.register_blueprint(admin_bp)
+app.register_blueprint(admin_bp, url_prefix='/admin')
 
 # ▶️ Lancement
 if __name__ == '__main__':

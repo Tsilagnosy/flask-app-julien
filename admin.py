@@ -21,7 +21,7 @@ def admin_required(f):
     return wrapper
 
 # 📊 Dashboard Admin (liste des utilisateurs)
-@admin_bp.route('/admin')
+@admin_bp.route('/')
 @admin_required
 def admin_dashboard():
     utilisateurs = list(db.utilisateurs.find())
