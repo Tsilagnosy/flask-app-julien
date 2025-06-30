@@ -35,7 +35,9 @@ def admin_required(f):
 def admin_dashboard():
     username = session.get('username')
     user = db.utilisateurs.find_one({"username": username})
-    
+    print("👀 Données actuelles en base :")
+    for user in db.utilisateurs.find({}, {"username": 1, "admin": 1, "_id": 0}):
+    print(user)
     print("🪪 Username session :", username)
     print("👤 Utilisateur trouvé :", user)
     print("🔐 Champ admin :", user.get('admin') if user else "Utilisateur introuvable")
