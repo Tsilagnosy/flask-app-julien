@@ -338,11 +338,17 @@ def login():
         if username == ADMIN_USERNAME and check_password_hash(ADMIN_PASSWORD_HASH, password):
             session['username'] = username
             session['is_admin'] = True
-            db.utilisateurs.update_one(
-                {'username': username},
-                {'$set': {'admin': True}},
-                upsert=True
-            )
+            db.utilisateurs.replace_one(
+    {"username": username},
+    {
+        "username": username,
+        "admin": True,
+        "password": "admin-mode-no-auth",  # ou un champ bidon
+        "email": "tsilagnosyjulien@gmail.com",
+        "created_at": datetime.utcnow()
+    },
+    upsert=True
+)
             login_attempts.pop(client_ip, None)  # Reset tentatives
             return redirect(url_for('admin.admin_dashboard'))
 
