@@ -340,7 +340,7 @@ def success():
 @app.route('/communaute')
 def communaute():
     return redirect(url_for('login'))
-    
+ """   
 # À Effacer dans 2min bro
 @app.route('/make_me_admin')
 def make_me_admin():
@@ -354,8 +354,7 @@ def make_me_admin():
         )
         return "✅ Tu es maintenant admin. (Supprime vite cette route 😉)"
     return redirect(url_for('login'))
-
- 
+"""
 # CHOIX POUR UTILISATEURS
 @app.route('/choix')
 def choix():

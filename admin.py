@@ -14,11 +14,20 @@ db = client["Cluster0"]
 def admin_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
-        user = db.utilisateurs.find_one({"username": session.get('username')})
-        if not user or not user.get('admin'):
+        username = session.get('username')
+        print("👤 Session username:", username)
+
+        user = db.utilisateurs.find_one({"username": username})
+        print("🔍 Utilisateur trouvé:", user)
+
+        if not user or user.get('admin') is not True:
+            print("🚫 Accès refusé — pas admin")
             return redirect(url_for('login'))
+
+        print("✅ Accès autorisé — admin confirmé")
         return f(*args, **kwargs)
     return wrapper
+    
 
 # 📊 Dashboard Admin (liste des utilisateurs)
 @admin_bp.route('/')
