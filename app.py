@@ -342,7 +342,7 @@ def communaute():
     return redirect(url_for('login'))
     
 # À Effacer dans 2min bro
-@app.route('/make_me_admin')
+"""@app.route('/make_me_admin')
 def make_me_admin():
     if 'username' in session:
         from pymongo import MongoClient
@@ -354,7 +354,7 @@ def make_me_admin():
         )
         return "✅ Tu es maintenant admin. (Supprime vite cette route 😉)"
     return redirect(url_for('login'))
-
+"""
 
  
 # CHOIX POUR UTILISATEURS
