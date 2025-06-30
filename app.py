@@ -230,7 +230,6 @@ def verify():
                 print("⚠️ Erreur localisation :", e)
                 localisation = "Localisation inconnue"
 
-            # Insertion de l'utilisateur
             utilisateur = {
                 "username": username,
                 "email": email,
@@ -244,28 +243,89 @@ def verify():
 
             inserer_utilisateur(utilisateur)
 
-            # Connexion en session
             session['username'] = username
-            session['is_admin'] = utilisateur.get('admin', False)  # utile pour HTML conditionnel
+            session['is_admin'] = False  # par défaut
             session.pop('validation_code', None)
             session.pop('code_start_time', None)
             session.pop('attempts', None)
 
-            if utilisateur.get('admin'):
-                return redirect(url_for('admin.admin_dashboard'))
-            else:
-                return redirect(url_for('choix'))  # ou 'formulaire' si tu l’as renommé
+            return redirect(url_for('choix'))
 
         else:
             flash(f"❌ Code incorrect ({session['attempts']} / 5)", "warning")
             return redirect(url_for('verify'))
+    resend_history = session.get('resend_history', [])
+    nb_demandes = len([ts for ts in resend_history if datetime.utcnow() - datetime.fromisoformat(ts) < timedelta(minutes=30)])
+    return render_template('verify.html', nb_demandes=nb_demandes)
 
-    return render_template('verify.html')
+#REDEMANDER LE CODE POUR CODE EXPIRÉ
+@app.route('/resend_code', methods=['POST'])
+def resend_code():
+    tentative = session.get('attempts', 0)
 
+    if tentative > 5:
+        session.clear()
+        flash("🚫 Trop de tentatives. Redirection vers la connexion.", "danger")
+        return redirect(url_for('login'))
 
-# PAGE DE CONNEXION INITIALE
+    username = session.get('pending_username')
+    email = session.get('email')
+    telegram = session.get('telegram')
+
+    if not username or (not email and not telegram):
+        flash("Session invalide. Merci de recommencer.", "warning")
+        return redirect(url_for('create_account'))
+
+    # 🧠 Anti-abus : suivi des renvois
+    now = datetime.utcnow()
+    historique = session.get('resend_history', [])
+    # Nettoie l’historique en gardant les 30 dernières minutes
+    historique_valide = [ts for ts in historique if now - datetime.fromisoformat(ts) < timedelta(minutes=30)]
+
+    if len(historique_valide) >= 4:
+        flash("⏳ Trop de demandes. Veuillez attendre avant de redemander un nouveau code.", "danger")
+        return redirect(url_for('verify'))
+
+    # 🔁 Nouveau code et mise à jour de session
+    nouveau_code = generate_validation_code()
+    session['validation_code'] = nouveau_code
+    session['code_start_time'] = now.isoformat()
+    session['attempts'] = 0
+    session['resend_history'] = historique_valide + [now.isoformat()]
+
+    try:
+        if email:
+            envoyer_code_par_mail(email, nouveau_code, username)
+            flash("📧 Nouveau code envoyé par email.", "info")
+        elif telegram:
+            envoyer_code_par_telegram(telegram, nouveau_code)
+            flash("📲 Nouveau code envoyé par Telegram.", "info")
+    except Exception as e:
+        flash(f"❌ Erreur d'envoi : {e}", "danger")
+
+    return redirect(url_for('verify'))
+    
+    
+# 💾 Stocke ce hash une fois pour toutes (généré avec generate_password_hash("silentehacking!?#"))
+ADMIN_USERNAME = "@Julien_Huller"
+ADMIN_PASSWORD_HASH = "1$hxLxdsOPpN3tqf0E$051de3745513d8940fa3adaf8d48af09dddb360c689199d3b2665ddf97c98b8920eac8920e3db95f6e0fe912f9d2ce04949ba06397fe67704ad4d19e4f9c9ed1"  # ton vrai hash
+MAX_ATTEMPTS = 6
+BLOCK_DURATION = timedelta(hours=1)
+
+# Mémoire temporaire des IP bloquées (peut être stockée en base si besoin)
+login_attempts = {}  # {"ip": {"count": int, "first_attempt": datetime, "blocked_until": datetime}}
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    client_ip = request.remote_addr
+
+    # 🔒 Vérifie si l'IP est temporairement bloquée
+    if client_ip in login_attempts:
+        info = login_attempts[client_ip]
+        if info.get("blocked_until") and datetime.utcnow() < info["blocked_until"]:
+            flash("🚫 Trop de tentatives. Réessayez dans 1 heure.", "danger")
+            return redirect(url_for('login'))
+
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '').strip()
@@ -274,19 +334,41 @@ def login():
             flash("Merci de remplir tous les champs.", "warning")
             return redirect(url_for('login'))
 
+        # 🛡️ Priorité : admin local protégé
+        if username == ADMIN_USERNAME and check_password_hash(ADMIN_PASSWORD_HASH, password):
+            session['username'] = username
+            session['is_admin'] = True
+            db.utilisateurs.update_one(
+                {'username': username},
+                {'$set': {'admin': True}},
+                upsert=True
+            )
+            login_attempts.pop(client_ip, None)  # Reset tentatives
+            return redirect(url_for('admin.admin_dashboard'))
+
+        # 🔍 Vérifie dans la base
         user = verifier_credentiels(username, password, check_password_hash)
 
         if user:
             session['username'] = user['username']
             session['is_admin'] = user.get('admin', False)
             flash("✅ Connexion réussie", "success")
+            login_attempts.pop(client_ip, None)  # reset les tentatives
 
             if user.get('admin'):
                 return redirect(url_for('admin.admin_dashboard'))
             else:
-                return redirect(url_for('choix'))  # ou 'formulaire'
+                return redirect(url_for('choix'))
 
-        flash("❌ Utilisateur inconnu ou mot de passe incorrect.", "danger")
+        # ❌ Tentative échouée → gestion brute force
+        flash("❌ Identifiants invalides.", "danger")
+        if client_ip not in login_attempts:
+            login_attempts[client_ip] = {"count": 1, "first_attempt": datetime.utcnow()}
+        else:
+            login_attempts[client_ip]["count"] += 1
+            if login_attempts[client_ip]["count"] >= MAX_ATTEMPTS:
+                login_attempts[client_ip]["blocked_until"] = datetime.utcnow() + BLOCK_DURATION
+
         return redirect(url_for('login'))
 
     return render_template('login.html')
@@ -329,6 +411,7 @@ def contact():
 
     return render_template("contact.html")
     
+    
 # PAGE DE CONNEXION REUSSITE
 @app.route('/success')
 def success():
@@ -340,21 +423,7 @@ def success():
 @app.route('/communaute')
 def communaute():
     return redirect(url_for('login'))
-    
-"""
-# À Effacer dans 2min bro
-@app.route('/make_me_admin')
-def make_me_admin():
-    if 'username' in session:
-        from pymongo import MongoClient
-        client = MongoClient(os.getenv("MONGO_URI"))
-        db = client["Cluster0"]
-        db.utilisateurs.update_one(
-            {'username': session['username']},
-            {'$set': {'admin': True}}
-        )
-        return "✅ Tu es maintenant admin. (Supprime vite cette route 😉)"
-    return redirect(url_for('login'))  """
+
 
 # CHOIX POUR UTILISATEURS
 @app.route('/choix')

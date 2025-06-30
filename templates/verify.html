@@ -2,94 +2,253 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <!-- Responsive meta tag -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Vérification de compte</title>
   <style>
+    :root {
+      --primary-gradient: linear-gradient(45deg, #FFA500, #8A2BE2);
+      --secondary-color: #D4E5FF;
+      --warning-color: #FF6B6B;
+      --success-color: #51CF66;
+      --text-muted: #6c757d;
+    }
+    
     body {
-      background-color: #D4E5FF;
-      font-family: Arial, sans-serif;
+      background-color: var(--secondary-color);
+      font-family: 'Segoe UI', Roboto, sans-serif;
       display: flex;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
       margin: 0;
-      padding: 20px; /* Espace sur les petits écrans */
+      padding: 20px;
     }
+    
     .container {
       background: white;
-      padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      padding: 2.5rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
       text-align: center;
       width: 100%;
-      max-width: 400px; /* Largeur max fixe pour desktop */
+      max-width: 450px;
+      animation: fadeIn 0.5s ease-out;
     }
+    
     h2 {
-      margin-bottom: 1.25rem;
-      font-size: 1.5rem;
-      background: linear-gradient(45deg, #FFA500, #8A2BE2);
+      margin-bottom: 1.5rem;
+      font-size: 1.8rem;
+      background: var(--primary-gradient);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      font-weight: 700;
     }
+    
+    .info-text {
+      font-size: 1rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+    
+    .warning-text {
+      font-weight: 600;
+      color: var(--warning-color);
+      font-size: 0.9rem;
+      margin-bottom: 1.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+    
+    .warning-text::before {
+      content: "⏱";
+      font-size: 1.2rem;
+    }
+    
     input[type="text"] {
       width: 100%;
-      padding: 0.75rem;
+      padding: 1rem;
       font-size: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      margin-bottom: 1rem;
-      box-sizing: border-box; /* Inclut le padding dans la largeur */
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      box-sizing: border-box;
+      transition: all 0.3s;
     }
-    button {
-      background: linear-gradient(45deg, #FFA500, #8A2BE2);
+    
+    input[type="text"]:focus {
+      border-color: #8A2BE2;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.2);
+    }
+    
+    .btn {
+      background: var(--primary-gradient);
       color: white;
       border: none;
-      padding: 0.75rem;
+      padding: 1rem;
       width: 100%;
-      font-size: 1rem;
-      border-radius: 6px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-radius: 8px;
       cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: 1rem;
+      position: relative;
+      overflow: hidden;
     }
-    p {
-      font-size: 0.875rem;
-      color: #555;
-      margin-bottom: 1.5rem;
+    
+    .btn:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
-
-    /* Media Queries pour ajustements responsive */
+    
+    .btn:active {
+      transform: translateY(0);
+    }
+    
+    .btn:disabled {
+      background: #e9ecef;
+      color: #adb5bd;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+    
+    .attempts-counter {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin: 1.5rem 0;
+      padding: 0.5rem;
+      border-radius: 6px;
+      background-color: #f8f9fa;
+    }
+    
+    .attempts-counter.warning {
+      color: var(--warning-color);
+      background-color: #fff5f5;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
     @media (max-width: 600px) {
       .container {
-        padding: 1.5rem;
+        padding: 2rem 1.5rem;
       }
+      
       h2 {
-        font-size: 1.25rem;
+        font-size: 1.5rem;
       }
     }
-.p1 {
-    font-weight: bold; /* Ajoutez cette ligne */
-    font-size: 0.875rem;
-    color: #555;
-    margin-bottom: 1.5rem;
-}
+    
     @media (max-width: 400px) {
       body {
-        padding: 10px;
+        padding: 15px;
       }
+      
       .container {
-        padding: 1.25rem;
+        padding: 1.5rem 1.25rem;
       }
+    }
+    
+    /* Style pour le compte à rebours */
+    .countdown {
+      font-weight: bold;
+      color: var(--warning-color);
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>Vérification du compte</h2>
-    <p>Un code vous a été envoyé. Entrez-le ci-dessous pour activer votre compte.</p>
-    <p class="p1"><em>vous n'aurez que 2min sinon code n'est plus valide</em></p>
+    <p class="info-text">Un code de vérification vous a été envoyé. Entrez-le ci-dessous pour activer votre compte.</p>
+    <p class="warning-text">Code valide pendant 2 minutes seulement</p>
+    
     <form method="post" action="{{ url_for('verify') }}">
       <input type="text" name="code" placeholder="Code de vérification" required>
-      <button type="submit">Valider</button>
+      <button type="submit" class="btn">Valider</button>
+    </form>
+    
+    {% if nb_demandes is defined %}
+      <div class="attempts-counter {% if nb_demandes >= 3 %}warning{% endif %}">
+        🔁 Demandes de code : {{ nb_demandes }}/4 utilisées (30 min)
+      </div>
+    {% endif %}
+    
+    <form id="resendForm" method="POST" action="{{ url_for('resend_code') }}">
+      <button type="button" id="resendBtn" class="btn">🔁 Renvoyer le code</button>
+      <div id="countdown" class="warning-text" style="display: none;"></div>
     </form>
   </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const resendBtn = document.getElementById('resendBtn');
+      const countdownEl = document.getElementById('countdown');
+      const resendForm = document.getElementById('resendForm');
+      const COOLDOWN_TIME = 120; // 2 minutes en secondes
+      
+      // Vérifier si un compte à rebours est déjà en cours (dans le localStorage)
+      let remainingTime = localStorage.getItem('codeResendCooldown') 
+        ? Math.max(0, COOLDOWN_TIME - Math.floor((Date.now() - parseInt(localStorage.getItem('codeResendTimestamp'))) / 1000)
+        : 0;
+
+      function updateButtonState() {
+        if (remainingTime > 0) {
+          resendBtn.disabled = true;
+          countdownEl.style.display = 'block';
+          countdownEl.innerHTML = `Veuillez patienter <span class="countdown">${formatTime(remainingTime)}</span> avant de pouvoir renvoyer`;
+          startCountdown();
+        } else {
+          resendBtn.disabled = false;
+          countdownEl.style.display = 'none';
+          localStorage.removeItem('codeResendCooldown');
+          localStorage.removeItem('codeResendTimestamp');
+        }
+      }
+
+      function formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+      }
+
+      function startCountdown() {
+        const timer = setInterval(() => {
+          remainingTime--;
+          countdownEl.innerHTML = `Veuillez patienter <span class="countdown">${formatTime(remainingTime)}</span> avant de pouvoir renvoyer`;
+          
+          if (remainingTime <= 0) {
+            clearInterval(timer);
+            updateButtonState();
+          }
+        }, 1000);
+      }
+
+      resendBtn.addEventListener('click', function(e) {
+        if (!resendBtn.disabled) {
+          // Enregistrer le moment du clic
+          localStorage.setItem('codeResendCooldown', 'true');
+          localStorage.setItem('codeResendTimestamp', Date.now());
+          remainingTime = COOLDOWN_TIME;
+          
+          // Désactiver le bouton et lancer le compte à rebours
+          updateButtonState();
+          
+          // Soumettre le formulaire
+          resendForm.submit();
+        }
+      });
+
+      // Initialiser l'état du bouton au chargement
+      updateButtonState();
+    });
+  </script>
 </body>
 </html>
