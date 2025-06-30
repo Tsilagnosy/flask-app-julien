@@ -2,83 +2,192 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Contactez le développeur</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <style>
-    body { background-color: #f8f9fa; }
-    .contact-card {
-      max-width: 600px;
-      margin: auto;
-      padding: 2rem;
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    :root {
+      --primary-blue: #4285f4; /* Couleur bleue comme dans le prompt */
+      --text-color: #212529;
+      --border-color: #e0e0e0;
     }
+    
+    body {
+      background-color: #f8f9fa;
+      padding: 15px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    
+    .contact-container {
+      max-width: 100%;
+      width: 100%;
+      padding: 0 15px;
+      margin: 0 auto;
+    }
+    
+    .contact-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 20px;
+      margin: 0 auto;
+      max-width: 500px;
+    }
+    
+    h3 {
+      color: var(--text-color);
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    
+    .form-control {
+      font-size: 16px; /* Empêche le zoom automatique */
+      padding: 12px 15px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    
+    .form-control:focus {
+      border-color: var(--primary-blue);
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+    }
+    
+    textarea.form-control {
+      min-height: 120px;
+      resize: vertical;
+    }
+    
+    .btn-send {
+      background-color: var(--primary-blue);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      width: 100%;
+      font-weight: 500;
+      margin-top: 15px;
+      transition: all 0.3s;
+    }
+    
+    .btn-send:hover {
+      background-color: #3367d6;
+      transform: translateY(-2px);
+    }
+    
+    .contact-links {
+      margin-top: 25px;
+    }
+    
     .contact-links a {
       display: block;
-      margin: 0.5rem 0;
-      font-size: 1.1rem;
-      color: #212529;
+      margin: 10px 0;
+      color: var(--text-color);
       text-decoration: none;
     }
+    
     .contact-links i {
-      color: #0d6efd;
-      width: 25px;
+      color: var(--primary-blue);
+      margin-right: 10px;
+      width: 20px;
+      text-align: center;
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid #eee;
+      margin: 20px 0;
+    }
+    
+    /* Style spécifique pour les messages flash */
+    .flash-message {
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    
+    .alert-success {
+      background-color: #e6ffed;
+      color: #2b8a3e;
+    }
+    
+    .alert-danger {
+      background-color: #fff5f5;
+      color: #c92a2a;
+    }
+    
+    .alert-warning {
+      background-color: #fff9db;
+      color: #e67700;
     }
   </style>
 </head>
 <body>
 
-<div class="contact-card mt-5">
-  <h3 class="text-center mb-4">📬 Laissez-nous un message</h3>
+<div class="contact-container">
+  <div class="contact-card">
+    <h3>📬 Laissez-nous un message</h3>
 
-{% set allowed_messages = [
-    "Votre message a été transmis avec succès",
-    "Échec d'envoi à Telegram",
-    "Erreur réseau",
-    "Merci de remplir tous les champs",
-    "Configuration Telegram manquante"
-] %}
+    {% set allowed_messages = [
+        "Votre message a été transmis avec succès",
+        "Échec d'envoi à Telegram",
+        "Erreur réseau",
+        "Merci de remplir tous les champs",
+        "Configuration Telegram manquante"
+    ] %}
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {# Trouver le premier message autorisé #}
-    {% set found = false %}
-    {% for category, message in messages|reverse %}
-      {% if not found and (message in allowed_messages or message.startswith(('✅', '❌', '⚠️'))) %}
-        <div class="alert alert-{{ category }} alert-dismissible fade show">
-          {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        {% set found = true %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% set category, message = messages[-1] %}
+        {% if message in allowed_messages or message.startswith(('✅', '❌', '⚠️')) %}
+          <div class="flash-message alert-{{ category }}">
+            {{ message }}
+          </div>
+        {% endif %}
       {% endif %}
-    {% endfor %}
-  {% endif %}
-{% endwith %}
-  
-  <form method="POST" action="/contact">
-    <div class="mb-3">
-      <label for="nom" class="form-label">Nom ou pseudo</label>
-      <input type="text" class="form-control" id="nom" name="nom" required>
-    </div>
-    <div class="mb-3">
-      <label for="message" class="form-label">Votre message</label>
-      <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
-    </div>
-    <button type="submit" class="btn btn-primary w-100">📨 Envoyer</button>
-  </form>
+    {% endwith %}
+    
+    <form method="POST" action="/contact">
+      <div class="form-group">
+        <label>Nom ou pseudo</label>
+        <input type="text" class="form-control" name="nom" required>
+      </div>
+      
+      <div class="form-group">
+        <label>Votre message</label>
+        <textarea class="form-control" name="message" required></textarea>
+      </div>
+      
+      <button type="submit" class="btn-send">
+        <i class="fas fa-paper-plane"></i> Envoyer
+      </button>
+    </form>
 
-  <hr class="my-4">
+    <hr>
 
-  <div class="contact-links">
-    <h5 class="mb-3">📞 Contacter le développeur</h5>
-    <a href="tel:+261346117893"><i class="fas fa-phone"></i> +261 34 61 17 893</a>
-    <a href="https://wa.me/261346117893" target="_blank"><i class="fab fa-whatsapp"></i> 034 61 17 893</a>
-    <a href="mailto:julientsila@gmail.com"><i class="fas fa-envelope"></i> julientsila@gmail.com</a>
-    <a href="https://t.me/mandeepsangar67" target="_blank"><i class="fab fa-telegram"></i> t.me/mandeepsangar67</a>
+    <div class="contact-links">
+      <h5>💟 Contact direct</h5>
+      <a href="tel:+261346117893"><i class="fas fa-phone"></i> +261 34 61 17 893</a>
+      <a href="https://wa.me/261346117893" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+      <a href="mailto:julientsila@gmail.com"><i class="fas fa-envelope"></i> julientsila@gmail.com</a>
+      <a href="https://t.me/mandeepsangar67" target="_blank"><i class="fab fa-telegram"></i> Telegram</a>
+    </div>
   </div>
 </div>
 
+<script>
+  // Empêche complètement le zoom sur mobile
+  document.addEventListener('touchmove', function(event) {
+    if (event.scale !== 1) { event.preventDefault(); }
+  }, { passive: false });
+</script>
 </body>
 </html>
