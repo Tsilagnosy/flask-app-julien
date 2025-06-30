@@ -345,13 +345,17 @@ def communaute():
 @app.route('/make_me_admin')
 def make_me_admin():
     if 'username' in session:
+        from pymongo import MongoClient
+        client = MongoClient(os.getenv("MONGO_URI"))
+        db = client["Cluster0"]
         db.utilisateurs.update_one(
             {'username': session['username']},
             {'$set': {'admin': True}}
         )
-        return "✅ Tu es maintenant admin (temporairement). Supprime cette route vite !"
+        return "✅ Tu es maintenant admin. (Supprime vite cette route 😉)"
     return redirect(url_for('login'))
-        
+
+
  
 # CHOIX POUR UTILISATEURS
 @app.route('/choix')
