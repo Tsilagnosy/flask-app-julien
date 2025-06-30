@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Liste des données</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         :root {
             --primary-color: #5d5fef;
@@ -14,6 +15,7 @@
             --border-color: #e0e0e0;
             --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --selection-color: #fff9c4; /* Jaune clair pour la sélection */
         }
 
         * {
@@ -46,6 +48,7 @@
         .filter-group {
             flex: 1;
             min-width: 250px;
+            position: relative;
         }
 
         .filter-group label {
@@ -64,6 +67,27 @@
             background-color: white;
             font-size: 0.95rem;
             transition: var(--transition);
+        }
+
+        .search-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .search-container input {
+            padding-right: 40px; /* Espace pour l'icône */
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary-color);
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 1rem;
         }
 
         .filter-group select:focus,
@@ -147,6 +171,10 @@
             background-color: rgba(108, 92, 231, 0.05);
         }
 
+        tr.selected td {
+            background-color: var(--selection-color) !important;
+        }
+
         tr:nth-child(even) {
             background-color: rgba(245, 245, 245, 0.5);
         }
@@ -180,6 +208,7 @@
 
         tbody tr {
             animation: rowEnter 0.4s ease-out forwards;
+            cursor: pointer;
         }
 
         tbody tr:nth-child(1) { animation-delay: 0.1s; }
@@ -230,7 +259,12 @@
             </div>
             <div class="filter-group">
                 <label for="search">Recherche</label>
-                <input type="text" id="search" placeholder="Entrez votre recherche...">
+                <div class="search-container">
+                    <input type="text" id="search" placeholder="Entrez votre recherche...">
+                    <button class="search-icon" id="search-button">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
             </div>
         </div>
         
@@ -240,7 +274,7 @@
                 <thead>
                     <tr>
                         {% for header in records[0].keys() %}
-                            <th>{{ header }}</th>
+                            <th data-column="{{ header }}">{{ header }}</th>
                         {% endfor %}
                     </tr>
                 </thead>
@@ -263,9 +297,9 @@
     </div>
 
     <script>
-        // Fonctionnalité de filtrage et recherche (à implémenter selon vos besoins)
-        document.getElementById('search').addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
+        // Fonction de recherche
+        function performSearch() {
+            const searchTerm = document.getElementById('search').value.toLowerCase();
             const filterBy = document.getElementById('filter-by').value;
             const rows = document.querySelectorAll('tbody tr');
             
@@ -274,7 +308,7 @@
                 let found = false;
                 
                 cells.forEach((cell, index) => {
-                    if (!filterBy || index === Array.from(document.querySelectorAll('th')).indexOf(document.querySelector(`th[data-column="${filterBy}"]`)) {
+                    if (!filterBy || index === Array.from(document.querySelectorAll('th')).findIndex(th => th.textContent === filterBy)) {
                         if (cell.textContent.toLowerCase().includes(searchTerm)) {
                             found = true;
                         }
@@ -282,6 +316,31 @@
                 });
                 
                 row.style.display = found ? '' : 'none';
+            });
+        }
+
+        // Écouteur d'événement pour la barre de recherche (saisie en temps réel)
+        document.getElementById('search').addEventListener('input', performSearch);
+        
+        // Écouteur d'événement pour le bouton de recherche
+        document.getElementById('search-button').addEventListener('click', performSearch);
+        
+        // Écouteur d'événement pour la touche Entrée
+        document.getElementById('search').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        // Sélection des lignes du tableau
+        document.querySelectorAll('tbody tr').forEach(row => {
+            row.addEventListener('click', function() {
+                // Retire la sélection de toutes les autres lignes
+                document.querySelectorAll('tbody tr').forEach(r => {
+                    r.classList.remove('selected');
+                });
+                // Ajoute la sélection à la ligne cliquée
+                this.classList.add('selected');
             });
         });
     </script>
