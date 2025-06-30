@@ -262,6 +262,8 @@ def verify():
 
     return render_template('verify.html')
 
+
+# PAGE DE CONNEXION INITIALE
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -289,7 +291,7 @@ def login():
 
     return render_template('login.html')
         
-#CONTACTER L'ADMIN'
+#CONTACTER L' ADMIN
 @app.route("/contact", methods=["GET", "POST"])
 def contact():
     if request.method == "POST":
@@ -327,14 +329,14 @@ def contact():
 
     return render_template("contact.html")
     
-    
+# PAGE DE CONNEXION REUSSITE
 @app.route('/success')
 def success():
     if 'username' not in session:
         return redirect(url_for('login'))
     return render_template('success.html')
 
-# Page de CONNEXION
+# Page de CONNEXION VIA PAGE D'ACCEUIL
 @app.route('/communaute')
 def communaute():
     return redirect(url_for('login'))
