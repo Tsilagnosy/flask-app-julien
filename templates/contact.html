@@ -33,20 +33,30 @@
 <div class="contact-card mt-5">
   <h3 class="text-center mb-4">📬 Laissez-nous un message</h3>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
+{% set allowed_messages = [
+    "Votre message a été transmis avec succès",
+    "Échec d'envoi à Telegram",
+    "Erreur réseau",
+    "Merci de remplir tous les champs",
+    "Configuration Telegram manquante"
+] %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
+    {# Trouver le premier message autorisé #}
+    {% set found = false %}
     {% for category, message in messages|reverse %}
-      {% if message.startswith(('✅', '❌', '⚠️')) %}
-        <div class="alert alert-{{ category }} mb-3">
+      {% if not found and (message in allowed_messages or message.startswith(('✅', '❌', '⚠️'))) %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show">
           {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-        {# On break après avoir affiché le premier message autorisé #}
-        {% break %}  
+        {% set found = true %}
       {% endif %}
     {% endfor %}
   {% endif %}
-{% endwith %} 
-
+{% endwith %}
+  
   <form method="POST" action="/contact">
     <div class="mb-3">
       <label for="nom" class="form-label">Nom ou pseudo</label>
