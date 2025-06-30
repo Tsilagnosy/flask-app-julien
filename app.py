@@ -308,7 +308,7 @@ def resend_code():
     
 # 💾 Stocke ce hash une fois pour toutes (généré avec generate_password_hash("silentehacking!?#"))
 ADMIN_USERNAME = "@Julien_Huller"
-ADMIN_PASSWORD_HASH = "1$hxLxdsOPpN3tqf0E$051de3745513d8940fa3adaf8d48af09dddb360c689199d3b2665ddf97c98b8920eac8920e3db95f6e0fe912f9d2ce04949ba06397fe67704ad4d19e4f9c9ed1"  # ton vrai hash
+ADMIN_PASSWORD_HASH = "scrypt:32768:8:1$TUTmCE0NrydWvhxW$d51a23c05d99b8d98357b6bc44fafadffd8350d13410663d31c7df2b6c6e3e4d5fc1369531e23d13052f1e48749db4db7f48da33c68b9f987b6961fddc2f21dd"  # ton vrai hash
 MAX_ATTEMPTS = 6
 BLOCK_DURATION = timedelta(hours=1)
 
