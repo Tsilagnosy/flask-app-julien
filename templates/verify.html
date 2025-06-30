@@ -32,7 +32,6 @@
       text-align: center;
       width: 100%;
       max-width: 450px;
-      animation: fadeIn 0.5s ease-out;
     }
     
     h2 {
@@ -96,25 +95,18 @@
       cursor: pointer;
       transition: all 0.3s;
       margin-bottom: 1rem;
-      position: relative;
-      overflow: hidden;
     }
     
-    .btn:hover {
+    .btn:hover:not(:disabled) {
       opacity: 0.9;
       transform: translateY(-2px);
       box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-    
-    .btn:active {
-      transform: translateY(0);
     }
     
     .btn:disabled {
       background: #e9ecef;
       color: #adb5bd;
       cursor: not-allowed;
-      transform: none !important;
     }
     
     .attempts-counter {
@@ -132,35 +124,10 @@
       background-color: #fff5f5;
     }
     
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    @media (max-width: 600px) {
-      .container {
-        padding: 2rem 1.5rem;
-      }
-      
-      h2 {
-        font-size: 1.5rem;
-      }
-    }
-    
-    @media (max-width: 400px) {
-      body {
-        padding: 15px;
-      }
-      
-      .container {
-        padding: 1.5rem 1.25rem;
-      }
-    }
-    
-    /* Style pour le compte à rebours */
     .countdown {
       font-weight: bold;
       color: var(--warning-color);
+      margin-top: 0.5rem;
     }
   </style>
 </head>
@@ -183,7 +150,7 @@
     
     <form id="resendForm" method="POST" action="{{ url_for('resend_code') }}">
       <button type="button" id="resendBtn" class="btn">🔁 Renvoyer le code</button>
-      <div id="countdown" class="warning-text" style="display: none;"></div>
+      <div id="countdown" class="countdown"></div>
     </form>
   </div>
 
@@ -191,63 +158,64 @@
     document.addEventListener('DOMContentLoaded', function() {
       const resendBtn = document.getElementById('resendBtn');
       const countdownEl = document.getElementById('countdown');
-      const resendForm = document.getElementById('resendForm');
       const COOLDOWN_TIME = 120; // 2 minutes en secondes
+      let cooldownInterval;
       
-      // Vérifier si un compte à rebours est déjà en cours (dans le localStorage)
-      let remainingTime = localStorage.getItem('codeResendCooldown') 
-        ? Math.max(0, COOLDOWN_TIME - Math.floor((Date.now() - parseInt(localStorage.getItem('codeResendTimestamp'))) / 1000)
+      // Vérifier le localStorage pour un cooldown existant
+      const lastResendTime = localStorage.getItem('lastResendTime');
+      const remainingCooldown = lastResendTime 
+        ? Math.max(0, COOLDOWN_TIME - Math.floor((Date.now() - lastResendTime) / 1000))
         : 0;
 
-      function updateButtonState() {
-        if (remainingTime > 0) {
+      function updateButtonState(remaining) {
+        if (remaining > 0) {
           resendBtn.disabled = true;
-          countdownEl.style.display = 'block';
-          countdownEl.innerHTML = `Veuillez patienter <span class="countdown">${formatTime(remainingTime)}</span> avant de pouvoir renvoyer`;
-          startCountdown();
+          startCountdown(remaining);
         } else {
           resendBtn.disabled = false;
-          countdownEl.style.display = 'none';
-          localStorage.removeItem('codeResendCooldown');
-          localStorage.removeItem('codeResendTimestamp');
+          countdownEl.textContent = '';
+          localStorage.removeItem('lastResendTime');
         }
       }
 
-      function formatTime(seconds) {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-      }
-
-      function startCountdown() {
-        const timer = setInterval(() => {
-          remainingTime--;
-          countdownEl.innerHTML = `Veuillez patienter <span class="countdown">${formatTime(remainingTime)}</span> avant de pouvoir renvoyer`;
+      function startCountdown(remaining) {
+        clearInterval(cooldownInterval);
+        
+        function update() {
+          const minutes = Math.floor(remaining / 60);
+          const seconds = remaining % 60;
+          countdownEl.textContent = `Prochain renvoi possible dans: ${minutes}:${seconds.toString().padStart(2, '0')}`;
           
-          if (remainingTime <= 0) {
-            clearInterval(timer);
-            updateButtonState();
+          if (remaining <= 0) {
+            clearInterval(cooldownInterval);
+            resendBtn.disabled = false;
+            countdownEl.textContent = '';
+            localStorage.removeItem('lastResendTime');
+          } else {
+            remaining--;
           }
-        }, 1000);
+        }
+        
+        update();
+        cooldownInterval = setInterval(update, 1000);
       }
 
-      resendBtn.addEventListener('click', function(e) {
+      resendBtn.addEventListener('click', function() {
         if (!resendBtn.disabled) {
           // Enregistrer le moment du clic
-          localStorage.setItem('codeResendCooldown', 'true');
-          localStorage.setItem('codeResendTimestamp', Date.now());
-          remainingTime = COOLDOWN_TIME;
+          const now = Date.now();
+          localStorage.setItem('lastResendTime', now);
           
-          // Désactiver le bouton et lancer le compte à rebours
-          updateButtonState();
+          // Désactiver le bouton et démarrer le compte à rebours
+          updateButtonState(COOLDOWN_TIME);
           
           // Soumettre le formulaire
-          resendForm.submit();
+          document.getElementById('resendForm').submit();
         }
       });
 
-      // Initialiser l'état du bouton au chargement
-      updateButtonState();
+      // Initialiser l'état du bouton
+      updateButtonState(remainingCooldown);
     });
   </script>
 </body>
