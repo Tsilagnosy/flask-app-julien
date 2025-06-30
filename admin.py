@@ -24,6 +24,13 @@ def admin_required(f):
 @admin_bp.route('/')
 @admin_required
 def admin_dashboard():
+    username = session.get('username')
+    user = db.utilisateurs.find_one({"username": username})
+    
+    print("🪪 Username session :", username)
+    print("👤 Utilisateur trouvé :", user)
+    print("🔐 Champ admin :", user.get('admin') if user else "Utilisateur introuvable")
+    
     utilisateurs = list(db.utilisateurs.find())
     return render_template('admin_dashboard.html', utilisateurs=utilisateurs)
 
