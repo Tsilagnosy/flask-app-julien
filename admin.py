@@ -53,7 +53,7 @@ def admin_dashboard():
     
     # Utilisateurs paginés
     users = db_manager.get_tous_utilisateurs(
-        filte=filtre
+        filtre=filtre
     ).sort('created_at', -1).skip((page-1)*per_page).limit(per_page)
     
     return render_template(
