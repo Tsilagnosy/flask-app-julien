@@ -16,6 +16,7 @@ from admin_seed import admin_seed_bp
 from dotenv import load_dotenv
 from admin import init_app
 from functionality import init_functionality
+from functionality import functionality_bp
 
 load_dotenv()
 # 📦 --- CONFIGURATION ---
