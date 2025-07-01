@@ -53,7 +53,7 @@ def admin_dashboard():
         })
     }
     stats['standards'] = stats['total'] - stats['admins']
-    
+    print("📂 Contenu du dossier templates :", os.listdir('templates'))
     return render_template(
         'admin_dashboard.html',
         utilisateurs=users,
