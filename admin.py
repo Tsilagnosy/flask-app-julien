@@ -8,41 +8,40 @@ import csv
 from io import StringIO
 from flask_moment import Moment
 import humanize
+from flask import current_app
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
-
-from flask import current_app
 
 admin_bp = Blueprint('admin', __name__)
 
 def init_app(app):
-    @app.before_first_request  # Correction: utiliser app au lieu de admin_bp
-    def register_filters():
-        from datetime import datetime
-        from flask import current_app
-        
-        def humanize_datetime(dt):
-            """Convertit un datetime en format "il y a X temps" """
-            if not dt:
-                return "Jamais"
-            
-            now = datetime.utcnow()
-            diff = now - dt
-            
-            if diff.days > 365:
-                return f"il y a {diff.days//365} an(s)"
-            elif diff.days > 30:
-                return f"il y a {diff.days//30} mois"
-            elif diff.days > 0:
-                return f"il y a {diff.days} jour(s)"
-            elif diff.seconds > 3600:
-                return f"il y a {diff.seconds//3600} heure(s)"
-            elif diff.seconds > 60:
-                return f"il y a {diff.seconds//60} minute(s)"
-            else:
-                return "à l'instant"
-        
-        current_app.jinja_env.filters['humanize'] = humanize_datetime
+    # Enregistrement direct du filtre sans décorateur
+    app.jinja_env.filters['humanize'] = humanize_datetime
+    
+    # Ou pour une initialisation au démarrage :
+    with app.app_context():
+        app.jinja_env.filters['humanize'] = humanize_datetime
+
+def humanize_datetime(dt):
+    """Convertit un datetime en format "il y a X temps" """
+    if not dt:
+        return "Jamais"
+    
+    now = datetime.utcnow()
+    diff = now - dt
+    
+    if diff.days > 365:
+        return f"il y a {diff.days//365} an(s)"
+    elif diff.days > 30:
+        return f"il y a {diff.days//30} mois"
+    elif diff.days > 0:
+        return f"il y a {diff.days} jour(s)"
+    elif diff.seconds > 3600:
+        return f"il y a {diff.seconds//3600} heure(s)"
+    elif diff.seconds > 60:
+        return f"il y a {diff.seconds//60} minute(s)"
+    else:
+        return "à l'instant"
 # ==============================================
 # 🔐 DÉCORATEURS ET FONCTIONS UTILITAIRES
 # ==============================================
