@@ -542,7 +542,7 @@ def trigger_backup():
     os.system("python send_backups.py")
     return "📤 Backup déclenché avec succès", 200
 
-app.register_blueprint(admin_bp, url_prefix='/admin')
+app.register_blueprint(admin_bp, url_prefix='/admin', template_folder='templates/admin')
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 10000))
