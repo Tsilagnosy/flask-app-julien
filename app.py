@@ -351,7 +351,7 @@ def login():
             session['username'] = username
             session['is_admin'] = True
 
-            users.replace_one(
+            utilisateurs.replace_one(
                 {"username": username},
                 {
                     "username": username,
