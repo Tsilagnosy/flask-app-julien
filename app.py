@@ -28,7 +28,7 @@ app.config["SESSION_COOKIE_SECURE"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.register_blueprint(admin_seed_bp)
 
-# 📧 --- CONFIGURATION FLASK-MAIL ---
+# 📧 --- CONFIGURATION FLASK-MAIL --
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
@@ -94,9 +94,12 @@ def alerter_connexion_admin(username):
 
 # Fonction pour vérifier les credentials (remplace l'import depuis db.py)
 def verifier_credentiels(username, mot_de_passe_clair, check_password_hash):
-    user = utilisateurs.find_one({"username": username})
-    if user and check_password_hash(user["password"], mot_de_passe_clair):
-        return user
+    utilisateur = utilisateurs.find_one({"username": username})
+    # Vérifiez d'abord si l'utilisateur existe et a un champ password
+    if not utilisateur or "password" not in utilisateur:
+        return None
+    if check_password_hash(utilisateur["password"], mot_de_passe_clair):
+        return utilisateur
     return None
 
 # Fonction pour insérer un utilisateur (remplace l'import depuis db.py)
@@ -326,69 +329,83 @@ def resend_code():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    # Réinitialisation sécurisée de la session
     session.clear()
+    session.permanent = True  # Active les sessions persistantes
+
     client_ip = request.remote_addr
 
+    # Gestion des tentatives bloquées
     if client_ip in login_attempts:
-        info = login_attempts[client_ip]
-        if info.get("blocked_until") and datetime.utcnow() < info["blocked_until"]:
-            flash("🚫 Trop de tentatives. Réessayez dans 1 heure.", "danger")
+        if login_attempts[client_ip].get("blocked_until") and datetime.utcnow() < login_attempts[client_ip]["blocked_until"]:
+            flash("Trop de tentatives. Réessayez plus tard.", "danger")
             return redirect(url_for('login'))
 
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '').strip()
 
+        # Validation des entrées
         if not username or not password:
-            flash("Merci de remplir tous les champs.", "warning")
+            flash("Tous les champs sont requis", "warning")
             return redirect(url_for('login'))
 
-        # Connexion admin
-        if username == ADMIN_USERNAME and check_password_hash(ADMIN_PASSWORD_HASH, password):
-            session['username'] = username
-            session['is_admin'] = True
+        # 🔐 Connexion Admin - Version renforcée
+        if username == ADMIN_USERNAME:
+            if check_password_hash(ADMIN_PASSWORD_HASH, password):
+                # Configuration robuste de la session
+                session.update({
+                    'user_id': str(utilisateurs.find_one({"username": username})["_id"]),
+                    'username': username,
+                    'is_admin': True,
+                    'login_time': datetime.utcnow().isoformat(),
+                    '_fresh': True
+                })
 
-            utilisateurs.replace_one(
-                {"username": username},
-                {
-                    "username": username,
-                    "admin": True,
-                    "email": "tsilagnosyjulien@gmail.com",
-                    "created_at": datetime.utcnow(),
-                    "last_login": datetime.utcnow()
-                },
-                upsert=True
-            )
+                # Mise à jour last login
+                utilisateurs.update_one(
+                    {"username": username},
+                    {"$set": {
+                        "last_login": datetime.utcnow(),
+                        "ip_address": client_ip
+                    }}
+                )
 
-            login_attempts.pop(client_ip, None)
-            alerter_connexion_admin(username)
-            flash("👑 Connexion administrateur réussie", "success")
-            return redirect(url_for('admin.admin_dashboard'))
+                login_attempts.pop(client_ip, None)
+                flash("Connexion admin réussie", "success")
+                return redirect(url_for('admin.admin_dashboard'))
+            else:
+                flash("Accès refusé", "danger")
+                return redirect(url_for('login'))
 
-        # Connexion utilisateur normal
+        # 👥 Connexion utilisateur standard
         user = verifier_credentiels(username, password, check_password_hash)
         if user:
-            session['username'] = user['username']
-            session['is_admin'] = user.get('admin', False)
-            login_attempts.pop(client_ip, None)
-            
-            # Mise à jour last login
+            session.update({
+                'user_id': str(user["_id"]),
+                'username': user["username"],
+                'is_admin': user.get("admin", False),
+                'login_time': datetime.utcnow().isoformat()
+            })
+
             utilisateurs.update_one(
-                {"username": user['username']},
+                {"_id": user["_id"]},
                 {"$set": {"last_login": datetime.utcnow()}}
             )
 
-            flash("✅ Connexion réussie", "success")
+            login_attempts.pop(client_ip, None)
+            flash("Connexion réussie", "success")
             return redirect(url_for('admin.admin_dashboard' if session['is_admin'] else 'choix'))
 
-        # Gestion des tentatives échouées
-        flash("❌ Identifiants invalides.", "danger")
-        if client_ip not in login_attempts:
-            login_attempts[client_ip] = {"count": 1, "first_attempt": datetime.utcnow()}
-        else:
-            login_attempts[client_ip]["count"] += 1
-            if login_attempts[client_ip]["count"] >= MAX_ATTEMPTS:
-                login_attempts[client_ip]["blocked_until"] = datetime.utcnow() + BLOCK_DURATION
+        # 🚨 Gestion des échecs
+        flash("Identifiants incorrects", "danger")
+        login_attempts[client_ip] = {
+            "count": login_attempts.get(client_ip, {}).get("count", 0) + 1,
+            "last_attempt": datetime.utcnow()
+        }
+        
+        if login_attempts[client_ip]["count"] >= MAX_ATTEMPTS:
+            login_attempts[client_ip]["blocked_until"] = datetime.utcnow() + BLOCK_DURATION
 
         return redirect(url_for('login'))
 
