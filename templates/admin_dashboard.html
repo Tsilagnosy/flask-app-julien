@@ -1,8 +1,141 @@
 <!DOCTYPE html>
-<html>
-<head><title>Admin</title></head>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Panel • FruitApp</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap & FontAwesome -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body { padding-top: 56px; }
+    .sidebar {
+      height: 100vh;
+      position: fixed;
+      top: 0; left: 0;
+      width: 240px;
+      background-color: #343a40;
+      color: #fff;
+    }
+    .sidebar a { color: #ddd; display: block; padding: 10px 20px; text-decoration: none; }
+    .sidebar a:hover { background-color: #495057; }
+    .dashboard-content { margin-left: 260px; padding: 20px; }
+    .table td, .table th { vertical-align: middle; }
+    .empty-field { color: #aaa; font-style: italic; }
+  </style>
+</head>
+
 <body>
-  <h1>👑 Dashboard Admin prêt !</h1>
-  <p>{{ stats.total }} utilisateur(s) en base.</p>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h4 class="text-center mt-3">👑 Admin</h4>
+    <a href="{{ url_for('admin.admin_dashboard') }}"><i class="fas fa-users"></i> Utilisateurs</a>
+    <a href="#"><i class="fas fa-chart-line"></i> Statistiques</a>
+    <a href="#"><i class="fas fa-cog"></i> Paramètres</a>
+    <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
+  </div>
+
+  <!-- Dashboard content -->
+  <div class="dashboard-content">
+    <div class="container-fluid">
+
+      <h2 class="mb-4">Tableau de bord des utilisateurs</h2>
+
+      <!-- Statistiques -->
+      <div class="row mb-4">
+        <div class="col-md-3">
+          <div class="card text-bg-primary">
+            <div class="card-body">
+              <h5 class="card-title">👥 Total</h5>
+              <p class="card-text fs-4">{{ stats.total }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card text-bg-success">
+            <div class="card-body">
+              <h5 class="card-title">👑 Admins</h5>
+              <p class="card-text fs-4">{{ stats.admins }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card text-bg-secondary">
+            <div class="card-body">
+              <h5 class="card-title">🙋‍♂️ Standards</h5>
+              <p class="card-text fs-4">{{ stats.standards }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card text-bg-warning">
+            <div class="card-body">
+              <h5 class="card-title">🕐 Aujourd’hui</h5>
+              <p class="card-text fs-4">{{ stats.today }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table Utilisateurs -->
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Nom</th>
+              <th>Email</th>
+              <th>Telegram</th>
+              <th>Signature</th>
+              <th>Créé</th>
+              <th>Admin</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in utilisateurs %}
+              <tr>
+                <td>{{ user.username }}</td>
+                <td>{{ user.email if user.email else '<span class="empty-field">–</span>' | safe }}</td>
+                <td>{{ user.telegram if user.telegram else '<span class="empty-field">–</span>' | safe }}</td>
+                <td>{{ user.signature }}</td>
+                <td>{{ user.created_at.strftime('%d/%m/%Y %H:%M') if user.created_at else '–' }}</td>
+                <td>{% if user.admin %}✅{% else %}❌{% endif %}</td>
+                <td>
+                  <div class="btn-group" role="group">
+                    <a href="{{ url_for('admin.supprimer_utilisateur', username=user.username) }}" 
+                      class="btn btn-outline-danger btn-sm"
+                      onclick="return confirm('❗Supprimer {{ user.username }} ?')">
+                      <i class="fas fa-trash-alt"></i>
+                    </a>
+                    <a href="{{ url_for('admin.restreindre_acces', signature=user.signature) }}" 
+                      class="btn btn-outline-warning btn-sm">
+                      <i class="fas fa-lock"></i>
+                    </a>
+                    {% if not user.admin %}
+                    <a href="{{ url_for('admin.promouvoir_admin', username=user.username) }}" 
+                      class="btn btn-outline-success btn-sm">
+                      <i class="fas fa-user-shield"></i>
+                    </a>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Bouton Reset (global) -->
+      <form method="POST" action="{{ url_for('admin.reset_utilisateurs') }}" onsubmit="return confirm('⚠️ Supprimer tous les utilisateurs ?')">
+        <button class="btn btn-danger mt-3">
+          🧨 Réinitialiser les utilisateurs
+        </button>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
