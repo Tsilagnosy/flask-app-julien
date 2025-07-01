@@ -226,6 +226,11 @@
     .fade-in {
       animation: fadeIn 0.5s ease-out;
     }
+    
+    /* Preview Buttons */
+    .preview-btn-group .btn {
+      margin: 0 5px 5px 0;
+    }
   </style>
 </head>
 
@@ -255,23 +260,23 @@
     <div class="sidebar-heading">Gestion</div>
     
     <div class="nav-item">
-      <a class="nav-link" href="{{ url_for('admin.admin_dashboard') }}">
+      <a class="nav-link" href="{{ url_for('functionality.users_full_list') }}">
         <i class="fas fa-fw fa-users"></i>
-        <span>Utilisateurs</span>
+        <span>Utilisateurs Complets</span>
       </a>
     </div>
     
     <div class="nav-item">
-      <a class="nav-link" href="#">
+      <a class="nav-link" href="{{ url_for('functionality.visit_stats') }}">
         <i class="fas fa-fw fa-chart-pie"></i>
-        <span>Statistiques</span>
+        <span>Statistiques Visites</span>
       </a>
     </div>
     
     <div class="nav-item">
-      <a class="nav-link" href="#">
-        <i class="fas fa-fw fa-cog"></i>
-        <span>Paramètres</span>
+      <a class="nav-link" href="#preview-section">
+        <i class="fas fa-fw fa-eye"></i>
+        <span>Prévisualisation</span>
       </a>
     </div>
     
@@ -304,8 +309,7 @@
           </div>
         </div>
       </form>
-      
-      <!-- Topbar Navbar -->
+       <!-- Topbar Navbar -->
       <ul class="navbar-nav ml-auto">
         <!-- Nav Item - Alerts -->
         <li class="nav-item dropdown no-arrow mx-1">
@@ -342,10 +346,18 @@
     <div class="container-fluid">
       <!-- Page Heading -->
       <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Tableau de bord</h1>
-        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-          <i class="fas fa-download fa-sm text-white-50"></i> Générer rapport
-        </a>
+        <h1 class="h3 mb-0 text-gray-800">Tableau de bord Admin</h1>
+        <div class="btn-group">
+          <a href="{{ url_for('functionality.export_users') }}" class="btn btn-sm btn-primary shadow-sm me-2">
+            <i class="fas fa-file-excel fa-sm text-white-50"></i> Export Utilisateurs
+          </a>
+          <a href="{{ url_for('functionality.export_visits') }}" class="btn btn-sm btn-info shadow-sm">
+            <i class="fas fa-file-csv fa-sm text-white-50"></i> Export Visites
+          </a>
+          <a href="#" class="btn btn-sm btn-secondary shadow-sm ms-2">
+            <i class="fas fa-download fa-sm text-white-50"></i> Générer rapport
+          </a>
+        </div>
       </div>
 
       <!-- Content Row -->
@@ -465,7 +477,98 @@
         </div>
       </div>
 
-      <!-- DataTable -->
+      <!-- Nouvelle Section : Prévisualisation des Pages -->
+      <div class="row mb-4 fade-in" id="preview-section">
+        <div class="col-12">
+          <div class="card shadow">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+              <h6 class="m-0 font-weight-bold text-primary">Prévisualisation des Pages</h6>
+            </div>
+            <div class="card-body">
+              <div class="preview-btn-group">
+                <a href="{{ url_for('functionality.route_preview', page='choix') }}" class="btn btn-outline-primary preview-btn">
+                  <i class="fas fa-list me-1"></i> Choix
+                </a>
+                <a href="{{ url_for('functionality.route_preview', page='listes') }}" class="btn btn-outline-primary preview-btn">
+                  <i class="fas fa-table me-1"></i> Listes
+                </a>
+                <a href="{{ url_for('functionality.route_preview', page='saisie') }}" class="btn btn-outline-primary preview-btn">
+                  <i class="fas fa-edit me-1"></i> Saisie
+                </a>
+                <a href="{{ url_for('functionality.route_preview', page='contact') }}" class="btn btn-outline-primary preview-btn">
+                  <i class="fas fa-envelope me-1"></i> Contact
+                </a>
+                <a href="{{ url_for('functionality.route_preview', page='report') }}" class="btn btn-outline-primary preview-btn">
+                  <i class="fas fa-flag me-1"></i> Report
+                </a>
+              </div>
+              <div class="mt-3 alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Ces pages s'ouvrent en mode prévisualisation depuis l'interface admin.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section Fonctionnalités Avancées -->
+      <div class="row fade-in">
+        <div class="col-12">
+          <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+              <h6 class="m-0 font-weight-bold text-primary">Fonctionnalités Avancées</h6>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-4 mb-4">
+                  <div class="card h-100 border-left-primary">
+                    <div class="card-body text-center">
+                      <i class="fas fa-users-cog fa-3x mb-3 text-primary"></i>
+                      <h5 class="card-title">Gestion Complète</h5>
+                      <p class="card-text">Accédez à toutes les informations utilisateurs</p>
+                      <a href="{{ url_for('functionality.users_full_list') }}" class="btn btn-primary">
+                        Voir la liste complète
+                      </a>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="col-md-4 mb-4">
+                  <div class="card h-100 border-left-success">
+                    <div class="card-body text-center">
+                      <i class="fas fa-chart-line fa-3x mb-3 text-success"></i>
+                      <h5 class="card-title">Statistiques Visites</h5>
+                      <p class="card-text">Analysez le trafic sur votre application</p>
+                      <a href="{{ url_for('functionality.visit_stats') }}" class="btn btn-success">
+                        Voir les statistiques
+                      </a>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="col-md-4 mb-4">
+                  <div class="card h-100 border-left-info">
+                    <div class="card-body text-center">
+                      <i class="fas fa-file-export fa-3x mb-3 text-info"></i>
+                      <h5 class="card-title">Exports</h5>
+                      <p class="card-text">Exportez les données au format Excel/CSV</p>
+                      <div class="btn-group">
+                        <a href="{{ url_for('functionality.export_users') }}" class="btn btn-info me-2">
+                          <i class="fas fa-file-excel"></i>
+                        </a>
+                        <a href="{{ url_for('functionality.export_visits') }}" class="btn btn-info">
+                          <i class="fas fa-file-csv"></i>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+       <!-- DataTable -->
       <div class="card shadow mb-4 fade-in">
         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
           <h6 class="m-0 font-weight-bold text-primary">Liste des utilisateurs</h6>
@@ -474,8 +577,8 @@
               <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
             </a>
             <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in">
-              <a class="dropdown-item" href="#">Exporter en CSV</a>
-              <a class="dropdown-item" href="#">Exporter en Excel</a>
+              <a class="dropdown-item" href="{{ url_for('functionality.export_users') }}">Exporter en Excel</a>
+              <a class="dropdown-item" href="{{ url_for('functionality.export_visits') }}">Exporter en CSV</a>
               <div class="dropdown-divider"></div>
               <a class="dropdown-item" href="#">Filtrer les inactifs</a>
             </div>
@@ -587,4 +690,127 @@
           <div class="modal-body">
             <div class="form-group">
               <label for="editUsername">Nom d'utilisateur</label>
-              <input type="text" class="form-control" id="editUsername" read
+              <input type="text" class="form-control" id="editUsername" readonly>
+            </div>
+            <div class="form-group">
+              <label for="editEmail">Email</label>
+              <input type="email" class="form-control" id="editEmail">
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="editAdmin">
+              <label class="form-check-label" for="editAdmin">
+                Administrateur
+              </label>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+  
+  <script>
+    // Activer DataTable
+    $(document).ready(function() {
+      $('#dataTable').DataTable({
+        language: {
+          url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
+        }
+      });
+      
+      // Initialiser les tooltips
+      $('[data-bs-toggle="tooltip"]').tooltip();
+      
+      // Gestion du modal d'édition
+      $('#editUserModal').on('show.bs.modal', function(event) {
+        var button = $(event.relatedTarget);
+        var username = button.data('user');
+        var email = button.data('email');
+        var admin = button.data('admin');
+        
+        var modal = $(this);
+        modal.find('#editUsername').val(username);
+        modal.find('#editEmail').val(email);
+        modal.find('#editAdmin').prop('checked', admin);
+      });
+      
+      // Gestion des previews
+      document.querySelectorAll('.preview-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          window.open(this.href, '_blank', 'width=1200,height=800');
+        });
+      });
+      
+      // Initialiser les graphiques
+      var ctx1 = document.getElementById('userActivityChart').getContext('2d');
+      var userActivityChart = new Chart(ctx1, {
+        type: 'line',
+        data: {
+          labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30'],
+          datasets: [{
+            label: "Activité",
+            lineTension: 0.3,
+            backgroundColor: "rgba(78, 115, 223, 0.05)",
+            borderColor: "rgba(78, 115, 223, 1)",
+            pointRadius: 3,
+            pointBackgroundColor: "rgba(78, 115, 223, 1)",
+            pointBorderColor: "rgba(78, 115, 223, 1)",
+            pointHoverRadius: 3,
+            pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
+            pointHoverBorderColor: "rgba(78, 115, 223, 1)",
+            pointHitRadius: 10,
+            pointBorderWidth: 2,
+            data: [0, 10, 5, 15, 10, 20, 15, 25, 20, 30, 25, 40, 30, 45, 40, 50, 45, 55, 50, 60, 55, 70, 60, 75, 70, 80, 75, 85, 80, 90],
+          }]
+        },
+        options: {
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+      
+      var ctx2 = document.getElementById('userDistributionChart').getContext('2d');
+      var userDistributionChart = new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+          labels: ["Admins", "Utilisateurs Actifs", "Utilisateurs Inactifs"],
+          datasets: [{
+            data: [10, 70, 20],
+            backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc'],
+            hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf'],
+            hoverBorderColor: "rgba(234, 236, 244, 1)",
+          }]
+        },
+        options: {
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          cutout: '80%',
+        }
+      });
+    });
+  </script>
+</body>
+</html>
