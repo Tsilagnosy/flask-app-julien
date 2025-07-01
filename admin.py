@@ -6,6 +6,31 @@ from database import utilisateurs  # Utilisation de la connexion centralisée
 from db import db_manager  # Pour utiliser les nouvelles méthodes
 import csv
 from io import StringIO
+from flask_moment import Moment
+
+
+def humanize_datetime(dt):
+    """Convertit un datetime en format "il y a X temps" """
+    if not dt:
+        return "Jamais"
+    
+    now = datetime.utcnow()
+    diff = now - dt
+    
+    if diff.days > 365:
+        return f"il y a {diff.days//365} an(s)"
+    elif diff.days > 30:
+        return f"il y a {diff.days//30} mois"
+    elif diff.days > 0:
+        return f"il y a {diff.days} jour(s)"
+    elif diff.seconds > 3600:
+        return f"il y a {diff.seconds//3600} heure(s)"
+    elif diff.seconds > 60:
+        return f"il y a {diff.seconds//60} minute(s)"
+    else:
+        return "à l'instant"
+
+
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -314,3 +339,4 @@ def get_admin_logs():
         return jsonify({'status': 'success', 'logs': logs})
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+        

@@ -542,6 +542,9 @@ def trigger_backup():
     os.system("python send_backups.py")
     return "📤 Backup déclenché avec succès", 200
 
+# Après avoir créé votre app Flask (généralement dans app.py ou __init__.py)
+app.jinja_env.filters['humanize'] = humanize_datetime
+
 app.register_blueprint(admin_bp, url_prefix='/admin', template_folder='templates')
 
 if __name__ == '__main__':
