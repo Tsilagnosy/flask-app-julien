@@ -98,7 +98,7 @@ def toggle_active(username):
             flash(f"🔄 Compte {username} {status}", "info")
     return redirect(url_for('.admin_dashboard'))
 
-# 🧹 Reset amélioré avec confirmation
+# 🧹 Effacer toutes les Utilisateurs non Admin d'un seul coup 
 @admin_bp.route('/reset-users', methods=['POST'])
 @admin_required
 def reset_utilisateurs():
@@ -108,4 +108,37 @@ def reset_utilisateurs():
         flash(f"🧹 {result.deleted_count} utilisateurs non-admins supprimés", "info")
     else:
         flash("❌ Confirmation invalide - aucune action effectuée", "danger")
+    return redirect(url_for('.admin_dashboard'))
+    
+# Supprimer Un Utilisateur Ciblé
+@admin_bp.route('/supprimer/<username>', methods=['GET'])
+@admin_required
+def supprimer_utilisateur(username):
+    user = utilisateurs.find_one({"username": username})
+    if user and not user.get("admin"):
+        utilisateurs.delete_one({"username": username})
+        flash(f"❌ Utilisateur {username} supprimé", "warning")
+    else:
+        flash("⚠️ Impossible de supprimer un administrateur ou utilisateur introuvable", "danger")
+    return redirect(url_for('.admin_dashboard'))
+    
+# Assigner Un Utilisateur pour devenir Admin
+@admin_bp.route('/promouvoir/<username>', methods=['GET'])
+@admin_required
+def promouvoir_admin(username):
+    user = utilisateurs.find_one({"username": username})
+
+    if not user:
+        flash(f"❌ Utilisateur {username} introuvable", "danger")
+        return redirect(url_for('.admin_dashboard'))
+
+    if user.get("admin"):
+        flash(f"ℹ️ {username} est déjà admin", "info")
+        return redirect(url_for('.admin_dashboard'))
+
+    utilisateurs.update_one(
+        {"username": username},
+        {"$set": {"admin": True, "role": "admin", "promu_le": datetime.utcnow()}}
+    )
+    flash(f"🚀 {username} promu au rang d’administrateur", "success")
     return redirect(url_for('.admin_dashboard'))
