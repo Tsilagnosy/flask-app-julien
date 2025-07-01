@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from oauth2client.service_account import ServiceAccountCredentials
 from werkzeug.security import generate_password_hash, check_password_hash
 from pymongo import MongoClient 
-from db import inserer_utilisateur, verifier_credentiels, db, est_admin, utilisateurs, users
+from db import inserer_utilisateur, verifier_credentiels, db, est_admin, utilisateurs
 from dotenv import load_dotenv
 load_dotenv()
 
