@@ -393,7 +393,115 @@ def login():
 
     return render_template('login.html')
 
-# ... (le reste de vos routes reste inchangé)
+#CONTACTER L' ADMIN
+@app.route("/contact", methods=["GET", "POST"])
+def contact():
+    if request.method == "POST":
+        nom = request.form.get("nom")
+        message = request.form.get("message")
+
+        if not nom or not message:
+            flash("Merci de remplir tous les champs.", "warning")
+            return redirect(url_for("contact"))
+
+        final_message = f"📩 *Nouveau message reçu*\n👤 Nom : {nom}\n💬 {message}"
+        token = os.environ.get("TELEGRAM_BOT_TOKEN")
+        chat_id = os.environ.get("TELEGRAM_CHAT_ID")
+
+        if not token or not chat_id:
+            flash("❌ Configuration Telegram manquante", "danger")
+            return redirect(url_for("contact"))
+
+        payload = {
+            "chat_id": chat_id,
+            "text": final_message,
+            "parse_mode": "Markdown"
+        }
+
+        try:
+            response = requests.post(f"https://api.telegram.org/bot{token}/sendMessage", data=payload)
+            if response.ok:
+                flash("✅ Votre message a été transmis avec succès !", "success")
+            else:
+                flash("❌ Échec d’envoi à Telegram", "danger")
+        except Exception as e:
+            flash(f"⚠️ Erreur réseau : {e}", "danger")
+
+        return redirect(url_for("contact"))
+
+    return render_template("contact.html")
+    
+# PAGE DE CONNEXION REUSSITE
+@app.route('/success')
+def success():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    return render_template('success.html')
+
+# Page de CONNEXION VIA PAGE D'ACCEUIL
+@app.route('/communaute')
+def communaute():
+    return redirect(url_for('login'))
+
+
+# CHOIX POUR UTILISATEURS
+@app.route('/choix')
+def choix():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    return render_template('choix.html')
+ 
+# Redirection pour REPORT BBT 
+@app.route('/report')
+def report():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    return render_template('report.html')
+       
+ # Route pour DECONNEXION  
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
+
+@app.route('/google2b9208b1f9fa091c.html')
+def google_verification():
+    return send_from_directory('static', 'google2b9208b1f9fa091c.html')
+
+@app.route('/debug-static')
+def debug_static():
+    return str(os.listdir('static'))
+
+@app.route("/sitemap.xml")
+def sitemap():
+    sitemap_xml = """<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://flask-app-julien.onrender.com/</loc><priority>1.0</priority></url>
+  <url><loc>https://flask-app-julien.onrender.com/login</loc><priority>0.9</priority></url>
+  <url><loc>https://flask-app-julien.onrender.com/contact</loc><priority>0.7</priority></url>
+  <url><loc>https://flask-app-julien.onrender.com/communaute</loc><priority>0.6</priority></url>
+</urlset>
+"""
+    return Response(sitemap_xml, mimetype='application/xml')
+
+@app.route('/robots.txt')
+def robots():
+    return send_from_directory('static', 'robots.txt')
+
+@app.route('/ping')
+def ping():
+    return "🟢 Appli Flask en ligne et connectée à Google Sheets"
+
+@app.route('/trigger-backup')
+def trigger_backup():
+    secret = request.args.get("key")
+    expected = os.environ.get("BACKUP_SECRET")
+    if not secret or secret != expected:
+        return abort(403, description="Clé de sécurité invalide")
+    os.system("python send_backups.py")
+    return "📤 Backup déclenché avec succès", 200
+
+app.register_blueprint(admin_bp, url_prefix='/admin')
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 10000))
