@@ -342,4 +342,4 @@ def get_admin_logs():
         return jsonify({'status': 'error', 'message': str(e)}), 500
   
 # Après avoir créé votre app Flask (généralement dans app.py ou __init__.py)
-app.jinja_env.filters['humanize'] = humanize_datetime()
+app.jinja_env.filters['humanize'] = humanize_datetime
