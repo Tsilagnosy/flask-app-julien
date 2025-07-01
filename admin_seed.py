@@ -1,53 +1,60 @@
-# admin_seed.py
-from flask import Blueprint, request, abort
-from pymongo import MongoClient
+from flask import Blueprint, request
 from werkzeug.security import generate_password_hash
 from datetime import datetime
 import os
+from database import utilisateurs  # Utilisation de la connexion centralisée
 
 admin_seed_bp = Blueprint('admin_seed', __name__)
-client = MongoClient(os.getenv("MONGO_URI"))
-db = client["ma_base"]
-utilisateurs = db["utilisateurs_validés"]
 
 SEED_KEY = os.getenv("SEED_KEY")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "silentehacking!?#")  # Valeur par défaut
 SEED_STATUS_FILE = "admin_seeded.flag"
 
 @admin_seed_bp.route('/seed-admin')
 def seed_admin():
-    # 🚫 Blocage si déjà semé
+    """Endpoint pour créer l'admin initial de manière sécurisée"""
+    
+    # Vérification du verrou
     if os.path.exists(SEED_STATUS_FILE):
-        return "✅ Admin déjà injecté. Accès désactivé.", 403
+        return "🔒 Admin déjà créé - sécurité activée", 403
 
-    # 🔑 Vérifie la clé dans l'URL
+    # Vérification de la clé de sécurité
     if request.args.get("key") != SEED_KEY:
-        return "⛔ Clé invalide.", 401
+        return "🔑 Clé de sécurité invalide", 401
 
+    # Vérification si l'admin existe déjà
     admin_username = "@Julien_Huller"
-    if utilisateurs.find_one({"username": admin_username}):
-        return "ℹ️ Utilisateur déjà en base.", 200
+    if utilisateurs.find_one({"username": admin_username, "admin": True}):
+        return "ℹ️ Compte admin existe déjà", 200
 
-    plain_pwd = os.getenv("ADMIN_PASSWORD")
-    if not plain_pwd:
-        return "⚠️ Mot de passe admin non configuré.", 500
-
-    utilisateurs.insert_one({
+    # Création du compte admin
+    admin_data = {
         "username": admin_username,
         "email": "tsilagnosyjulien@gmail.com",
-        "telegram": "",
-        "password": generate_password_hash(plain_pwd),
+        "password": generate_password_hash(ADMIN_PASSWORD),
         "admin": True,
-        "role": "admin",
-        "via": "admin_seed.py",
+        "role": "superadmin",
+        "via": "seed_script",
         "created_at": datetime.utcnow(),
-        "signature": request.headers.get("User-Agent", "inconnu"),
-        "location": "Seed sécurisé",
-        "timestamp": datetime.utcnow()
-    })
+        "last_login": None,
+        "signature": request.headers.get("User-Agent", "seed_script"),
+        "ip_creation": request.remote_addr,
+        "active": True
+    }
 
-    # 🔒 Désactive la route définitivement
-    with open(SEED_STATUS_FILE, "w") as f:
-        f.write("seeded")
-
-    print("👑 Admin semé avec succès et verrouillé.")
-    return "🚀 Admin initialisé et verrouillé.", 201
+    try:
+        # Insertion avec vérification
+        result = utilisateurs.replace_one(
+            {"username": admin_username},
+            admin_data,
+            upsert=True
+        )
+        
+        # Création du verrou
+        with open(SEED_STATUS_FILE, 'w') as f:
+            f.write(datetime.utcnow().isoformat())
+            
+        return f"👑 Admin créé avec succès (ID: {result.upserted_id})", 201
+        
+    except Exception as e:
+        return f"❌ Erreur lors de la création: {str(e)}", 500
