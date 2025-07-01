@@ -544,7 +544,6 @@ def trigger_backup():
     os.system("python send_backups.py")
     return "📤 Backup déclenché avec succès", 200
 
-app = Flask(__name__)
 app.register_blueprint(admin_bp, url_prefix='/admin', template_folder='templates')
 init_app(app)  # Initialise les filtres
 
