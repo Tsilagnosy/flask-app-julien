@@ -4,6 +4,7 @@ import pandas as pd
 import gspread
 import requests
 import random
+import humanize
 from admin import admin_bp
 from flask import Flask, session, request, redirect, url_for, render_template, abort, flash, send_from_directory, Response
 from flask_mail import Mail, Message
