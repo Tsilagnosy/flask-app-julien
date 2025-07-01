@@ -28,18 +28,21 @@ def admin_required(f):
 @admin_bp.route('/')
 @admin_required
 def admin_dashboard():
-    # Récupération efficace avec pagination
     page = request.args.get('page', 1, type=int)
     per_page = 20
     
-    # Filtres dynamiques
     filtre = {}
     if request.args.get('inactifs'):
         filtre['active'] = False
     if request.args.get('admins'):
         filtre['admin'] = True
     
-    # Stats en une seule requête
+    # Correction ici : utilisation d'une liste de tuples pour sort()
+    users_cursor = db_manager.get_tous_utilisateurs(filtre=filtre)
+    users = users_cursor.sort([('created_at', -1)]) \
+                       .skip((page-1)*per_page) \
+                       .limit(per_page)
+    
     stats = {
         'total': db_manager.compter_utilisateurs(),
         'admins': db_manager.compter_utilisateurs({'admin': True}),
@@ -51,18 +54,13 @@ def admin_dashboard():
     }
     stats['standards'] = stats['total'] - stats['admins']
     
-    # Utilisateurs paginés
-    users = db_manager.get_tous_utilisateurs(
-        filtre=filtre
-    ).sort('created_at', -1).skip((page-1)*per_page).limit(per_page)
-    
     return render_template(
         'admin_dashboard.html',
-        utilisateurs=users,
+        utilisateurs=list(users),  # Conversion en liste
         stats=stats,
         current_page=page
     )
-
+    
 # 🗑️ Suppression sécurisée
 @admin_bp.route('/supprimer/<username>')
 @admin_required
