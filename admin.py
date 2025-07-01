@@ -7,6 +7,7 @@ from db import db_manager  # Pour utiliser les nouvelles méthodes
 import csv
 from io import StringIO
 from flask_moment import Moment
+import humanize
 
 
 def humanize_datetime(dt):

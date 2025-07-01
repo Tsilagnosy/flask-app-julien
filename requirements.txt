@@ -12,3 +12,4 @@ requests
 openpyxl
 python-telegram-bot
 flask-moment
+humanize
