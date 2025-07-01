@@ -9,9 +9,16 @@ from io import StringIO
 from flask_moment import Moment
 import humanize
 
+admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
-def humanize_datetime(dt):
-    """Convertit un datetime en format "il y a X temps" """
+from flask import current_app
+
+admin_bp = Blueprint('admin', __name__)
+
+@admin_bp.before_app_first_request
+def register_filters():
+    def humanize_datetime(dt):
+        """Convertit un datetime en format "il y a X temps" """
     if not dt:
         return "Jamais"
     
@@ -30,11 +37,7 @@ def humanize_datetime(dt):
         return f"il y a {diff.seconds//60} minute(s)"
     else:
         return "à l'instant"
-
-
-
-admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
-
+    current_app.jinja_env.filters['humanize'] = humanize_datetime
 # ==============================================
 # 🔐 DÉCORATEURS ET FONCTIONS UTILITAIRES
 # ==============================================
@@ -341,5 +344,3 @@ def get_admin_logs():
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
   
-# Après avoir créé votre app Flask (généralement dans app.py ou __init__.py)
-app.jinja_env.filters['humanize'] = humanize_datetime
