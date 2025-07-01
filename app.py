@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from oauth2client.service_account import ServiceAccountCredentials
 from werkzeug.security import generate_password_hash, check_password_hash
 from pymongo import MongoClient 
-from db import inserer_utilisateur, verifier_credentiels, db
+from db import inserer_utilisateur, verifier_credentiels, db, est_admin, utilisateurs, users
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -315,12 +315,23 @@ BLOCK_DURATION = timedelta(hours=1)
 
 # Mémoire temporaire des IP bloquées (peut être stockée en base si besoin)
 login_attempts = {}  # {"ip": {"count": int, "first_attempt": datetime, "blocked_until": datetime}}
+def alerter_connexion_admin(username):
+    token = os.getenv("TELEGRAM_BOT_TOKEN")
+    chat_id = os.getenv("TELEGRAM_CHAT_ID")
+    if token and chat_id:
+        try:
+            msg = f"👑 *Connexion admin détectée*\nUtilisateur : `{username}`\n⏱️ {datetime.utcnow().strftime('%d/%m/%Y %H:%M:%S')} UTC"
+            requests.post(
+                f"https://api.telegram.org/bot{token}/sendMessage",
+                data={"chat_id": chat_id, "text": msg, "parse_mode": "Markdown"}
+            )
+        except Exception as e:
+            print("⚠️ Erreur Telegram admin :", e)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     client_ip = request.remote_addr
 
-    # 🔒 Vérifie si l'IP est temporairement bloquée
     if client_ip in login_attempts:
         info = login_attempts[client_ip]
         if info.get("blocked_until") and datetime.utcnow() < info["blocked_until"]:
@@ -335,39 +346,46 @@ def login():
             flash("Merci de remplir tous les champs.", "warning")
             return redirect(url_for('login'))
 
-        # 🛡️ Priorité : admin local protégé
+        # 🔐 Connexion admin prioritaire
         if username == ADMIN_USERNAME and check_password_hash(ADMIN_PASSWORD_HASH, password):
             session['username'] = username
             session['is_admin'] = True
-            db.utilisateurs.replace_one(
-    {"username": username},
-    {
-        "username": username,
-        "admin": True,
-        "password": ADMIN_PASSWORD_HASH,  # ou un champ bidon
-        "email": "tsilagnosyjulien@gmail.com",
-        "created_at": datetime.utcnow()
-    },
-    upsert=True
-)
-            login_attempts.pop(client_ip, None)  # Reset tentatives
+
+            users.replace_one(
+                {"username": username},
+                {
+                    "username": username,
+                    "admin": True,
+                    "password": "admin-login-direct",
+                    "email": "tsilagnosyjulien@gmail.com",
+                    "created_at": datetime.utcnow(),
+                    "via": "admin_override",
+                    "signature": request.headers.get("User-Agent", "Inconnu"),
+                    "location": "Connexion directe"
+                },
+                upsert=True
+            )
+
+            login_attempts.pop(client_ip, None)
+            alerter_connexion_admin(username)  # ✅ Déclenche l'alerte Telegram
+            flash("👑 Connexion administrateur réussie", "info")
             return redirect(url_for('admin.admin_dashboard'))
 
-        # 🔍 Vérifie dans la base
+        # 👥 Connexion utilisateur régulier
         user = verifier_credentiels(username, password, check_password_hash)
 
         if user:
             session['username'] = user['username']
             session['is_admin'] = user.get('admin', False)
             flash("✅ Connexion réussie", "success")
-            login_attempts.pop(client_ip, None)  # reset les tentatives
+            login_attempts.pop(client_ip, None)
 
-            if user.get('admin'):
+            if session['is_admin']:
                 return redirect(url_for('admin.admin_dashboard'))
             else:
                 return redirect(url_for('choix'))
 
-        # ❌ Tentative échouée → gestion brute force
+        # ❌ Échec : tentative brute-force
         flash("❌ Identifiants invalides.", "danger")
         if client_ip not in login_attempts:
             login_attempts[client_ip] = {"count": 1, "first_attempt": datetime.utcnow()}
