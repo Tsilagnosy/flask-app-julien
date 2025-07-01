@@ -543,8 +543,12 @@ def trigger_backup():
     os.system("python send_backups.py")
     return "📤 Backup déclenché avec succès", 200
 
+app = Flask(__name__)
 app.register_blueprint(admin_bp, url_prefix='/admin', template_folder='templates')
+init_app(app)  # Initialise les filtres
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 10000))
     app.run(host='0.0.0.0', port=port)
+    
+
