@@ -4,16 +4,18 @@ import pandas as pd
 import gspread
 import requests
 import random
+import humanize
 from admin import admin_bp
 from flask import Flask, session, request, redirect, url_for, render_template, abort, flash, send_from_directory, Response
 from flask_mail import Mail, Message
 from datetime import datetime, timedelta
 from oauth2client.service_account import ServiceAccountCredentials
 from werkzeug.security import generate_password_hash, check_password_hash
-from pymongo import MongoClient 
-from db import inserer_utilisateur, verifier_credentiels, db, est_admin, utilisateurs
+from database import utilisateurs  # Modification ici - Import depuis database.py
 from admin_seed import admin_seed_bp
 from dotenv import load_dotenv
+from admin import init_app
+
 load_dotenv()
 
 # 📦 --- CONFIGURATION ---
@@ -27,7 +29,8 @@ app.secret_key = os.environ.get("FLASK_SECRET", "clé-temporaire-par-défaut")
 app.config["SESSION_COOKIE_SECURE"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.register_blueprint(admin_seed_bp)
-# 📧 --- CONFIGURATION FLASK-MAIL ---
+
+# 📧 --- CONFIGURATION FLASK-MAIL --
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
@@ -36,16 +39,18 @@ app.config['MAIL_PASSWORD'] = 'vysl egbx ybpd ecjr'
 app.config['MAIL_DEFAULT_SENDER'] = 'alexcardosydonie@gmail.com'
 mail = Mail(app)
 
-# PAGE D'ACCEUIL BRO 
-@app.route('/')
-def accueil():
-    return render_template('index.html')
+# Constantes Admin
+ADMIN_USERNAME = "@Julien_Huller"
+ADMIN_PASSWORD = "silentehacking!?#"
+ADMIN_PASSWORD_HASH = generate_password_hash(ADMIN_PASSWORD)
+MAX_ATTEMPTS = 6
+BLOCK_DURATION = timedelta(hours=1)
+login_attempts = {}  # Stockage des tentatives de connexion
 
-# 🎲 --- GÉNÉRATION CODE DE VALIDATION ---
+# Fonctions utilitaires
 def generate_validation_code():
     return str(random.randint(100000, 999999))
 
-# 📤 --- ENVOI DU CODE PAR EMAIL ---
 def envoyer_code_par_mail(destinataire, code, nom):
     try:
         msg = Message(
@@ -57,7 +62,6 @@ def envoyer_code_par_mail(destinataire, code, nom):
     except Exception as e:
         print(f"❌ Erreur email : {e}")
 
-# 🤖 --- ENVOI DU CODE PAR TELEGRAM ---
 def envoyer_code_par_telegram(chat_id, code):
     token = os.getenv("TELEGRAM_BOT_TOKEN")
     if not token:
@@ -77,7 +81,40 @@ def envoyer_code_par_telegram(chat_id, code):
     except Exception as e:
         print(f"❌ Exception Telegram : {e}")
 
-# 📥 --- PAGE DE SAISIE PROTÉGÉE ---
+def alerter_connexion_admin(username):
+    token = os.getenv("TELEGRAM_BOT_TOKEN")
+    chat_id = os.getenv("TELEGRAM_CHAT_ID")
+    if token and chat_id:
+        try:
+            msg = f"👑 *Connexion admin détectée*\nUtilisateur : `{username}`\n⏱️ {datetime.utcnow().strftime('%d/%m/%Y %H:%M:%S')} UTC"
+            requests.post(
+                f"https://api.telegram.org/bot{token}/sendMessage",
+                data={"chat_id": chat_id, "text": msg, "parse_mode": "Markdown"}
+            )
+        except Exception as e:
+            print("⚠️ Erreur Telegram admin :", e)
+
+# Fonction pour vérifier les credentials (remplace l'import depuis db.py)
+def verifier_credentiels(username, mot_de_passe_clair, check_password_hash):
+    utilisateur = utilisateurs.find_one({"username": username})
+    # Vérifiez d'abord si l'utilisateur existe et a un champ password
+    if not utilisateur or "password" not in utilisateur:
+        return None
+    if check_password_hash(utilisateur["password"], mot_de_passe_clair):
+        return utilisateur
+    return None
+
+# Fonction pour insérer un utilisateur (remplace l'import depuis db.py)
+def inserer_utilisateur(data):
+    data.setdefault("admin", False)
+    data.setdefault("created_at", datetime.utcnow())
+    return utilisateurs.insert_one(data)
+
+# Routes
+@app.route('/')
+def accueil():
+    return render_template('index.html')
+
 @app.route('/saisie', methods=['GET', 'POST'])
 def saisie():
     if 'username' not in session:
@@ -116,21 +153,14 @@ def saisie():
             creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, SCOPE)
             client = gspread.authorize(creds)
             sheet = client.open_by_key(SHEET_ID).worksheet("Donnees_Site_Users")
-
-            row = [
-                data['nom'], data['cell'], data['numero'], data['fruit'],
-                data['num_fruit'], data['adresse'], data['occupation'],
-                data['Fotoana'], data['gender'], data['dob'], data['religion']
-            ]
-            sheet.append_row(row)
+            sheet.append_row(list(data.values()))
         except Exception as e:
             print("⚠️ Erreur Google Sheets :", e)
 
         return redirect(url_for('success'))
 
     return render_template('saisie.html')
-    
-# LISTE VOANKAZO ENREGISTRÉS 
+
 @app.route('/voir_liste')
 def voir_liste():
     if 'username' not in session:
@@ -140,15 +170,13 @@ def voir_liste():
         creds_dict = json.loads(os.environ["GOOGLE_CREDENTIALS_JSON"])
         creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, SCOPE)
         client = gspread.authorize(creds)
-        sheet = client.open_by_key(SHEET_ID).worksheet("Donnees_Site_Users")
-        records = sheet.get_all_records()
+        records = client.open_by_key(SHEET_ID).worksheet("Donnees_Site_Users").get_all_records()
     except Exception as e:
         print("⚠️ Erreur lecture Google Sheets :", e)
         records = []
 
     return render_template('liste.html', records=records)
-    
-# CREATION DE COMPTE UTILISATEUR'
+
 @app.route('/create_account', methods=['GET', 'POST'])
 def create_account():
     if request.method == 'POST':
@@ -187,7 +215,6 @@ def create_account():
 
     return render_template('create_account.html')
 
-# Page de VERIFICATION DE COMPTE 
 @app.route('/verify', methods=['GET', 'POST'])
 def verify():
     code_attendu = session.get('validation_code')
@@ -231,7 +258,7 @@ def verify():
                 print("⚠️ Erreur localisation :", e)
                 localisation = "Localisation inconnue"
 
-            utilisateur = {
+            inserer_utilisateur({
                 "username": username,
                 "email": email,
                 "telegram": telegram,
@@ -239,13 +266,12 @@ def verify():
                 "via": "email" if email else "telegram",
                 "signature": signature,
                 "created_at": creation_date,
-                "location": localisation
-            }
-
-            inserer_utilisateur(utilisateur)
+                "location": localisation,
+                "admin": False
+            })
 
             session['username'] = username
-            session['is_admin'] = False  # par défaut
+            session['is_admin'] = False
             session.pop('validation_code', None)
             session.pop('code_start_time', None)
             session.pop('attempts', None)
@@ -255,11 +281,11 @@ def verify():
         else:
             flash(f"❌ Code incorrect ({session['attempts']} / 5)", "warning")
             return redirect(url_for('verify'))
+    
     resend_history = session.get('resend_history', [])
     nb_demandes = len([ts for ts in resend_history if datetime.utcnow() - datetime.fromisoformat(ts) < timedelta(minutes=30)])
     return render_template('verify.html', nb_demandes=nb_demandes)
 
-#REDEMANDER LE CODE POUR CODE EXPIRÉ
 @app.route('/resend_code', methods=['POST'])
 def resend_code():
     tentative = session.get('attempts', 0)
@@ -277,17 +303,14 @@ def resend_code():
         flash("Session invalide. Merci de recommencer.", "warning")
         return redirect(url_for('create_account'))
 
-    # 🧠 Anti-abus : suivi des renvois
     now = datetime.utcnow()
     historique = session.get('resend_history', [])
-    # Nettoie l’historique en gardant les 30 dernières minutes
     historique_valide = [ts for ts in historique if now - datetime.fromisoformat(ts) < timedelta(minutes=30)]
 
     if len(historique_valide) >= 4:
         flash("⏳ Trop de demandes. Veuillez attendre avant de redemander un nouveau code.", "danger")
         return redirect(url_for('verify'))
 
-    # 🔁 Nouveau code et mise à jour de session
     nouveau_code = generate_validation_code()
     session['validation_code'] = nouveau_code
     session['code_start_time'] = now.isoformat()
@@ -305,100 +328,91 @@ def resend_code():
         flash(f"❌ Erreur d'envoi : {e}", "danger")
 
     return redirect(url_for('verify'))
-    
-    
-# 💾 Stocke ce hash une fois pour toutes (généré avec generate_password_hash("silentehacking!?#"))
-ADMIN_USERNAME = "@Julien_Huller"
-ADMIN_PASSWORD= "silentehacking!?#"
-ADMIN_PASSWORD_HASH = generate_password_hash(ADMIN_PASSWORD)  # ton vrai hash
-MAX_ATTEMPTS = 6
-BLOCK_DURATION = timedelta(hours=1)
-
-# Mémoire temporaire des IP bloquées (peut être stockée en base si besoin)
-login_attempts = {}  # {"ip": {"count": int, "first_attempt": datetime, "blocked_until": datetime}}
-def alerter_connexion_admin(username):
-    token = os.getenv("TELEGRAM_BOT_TOKEN")
-    chat_id = os.getenv("TELEGRAM_CHAT_ID")
-    if token and chat_id:
-        try:
-            msg = f"👑 *Connexion admin détectée*\nUtilisateur : `{username}`\n⏱️ {datetime.utcnow().strftime('%d/%m/%Y %H:%M:%S')} UTC"
-            requests.post(
-                f"https://api.telegram.org/bot{token}/sendMessage",
-                data={"chat_id": chat_id, "text": msg, "parse_mode": "Markdown"}
-            )
-        except Exception as e:
-            print("⚠️ Erreur Telegram admin :", e)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    # Réinitialisation sécurisée de la session
+    session.clear()
+    session.permanent = True  # Active les sessions persistantes
+
     client_ip = request.remote_addr
 
+    # Gestion des tentatives bloquées
     if client_ip in login_attempts:
-        info = login_attempts[client_ip]
-        if info.get("blocked_until") and datetime.utcnow() < info["blocked_until"]:
-            flash("🚫 Trop de tentatives. Réessayez dans 1 heure.", "danger")
+        if login_attempts[client_ip].get("blocked_until") and datetime.utcnow() < login_attempts[client_ip]["blocked_until"]:
+            flash("Trop de tentatives. Réessayez plus tard.", "danger")
             return redirect(url_for('login'))
 
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '').strip()
 
+        # Validation des entrées
         if not username or not password:
-            flash("Merci de remplir tous les champs.", "warning")
+            flash("Tous les champs sont requis", "warning")
             return redirect(url_for('login'))
 
-        # 🔐 Connexion admin prioritaire
-        if username == ADMIN_USERNAME and check_password_hash(ADMIN_PASSWORD_HASH, password):
-            session['username'] = username
-            session['is_admin'] = True
+        # 🔐 Connexion Admin - Version renforcée
+        if username == ADMIN_USERNAME:
+            if check_password_hash(ADMIN_PASSWORD_HASH, password):
+                # Configuration robuste de la session
+                session.update({
+                    'user_id': str(utilisateurs.find_one({"username": username})["_id"]),
+                    'username': username,
+                    'is_admin': True,
+                    'login_time': datetime.utcnow().isoformat(),
+                    '_fresh': True
+                })
 
-            utilisateurs.replace_one(
-                {"username": username},
-                {
-                    "username": username,
-                    "admin": True,
-                    "password": "admin-login-direct",
-                    "email": "tsilagnosyjulien@gmail.com",
-                    "created_at": datetime.utcnow(),
-                    "via": "admin_override",
-                    "signature": request.headers.get("User-Agent", "Inconnu"),
-                    "location": "Connexion directe"
-                },
-                upsert=True
+                # Mise à jour last login
+                utilisateurs.update_one(
+                    {"username": username},
+                    {"$set": {
+                        "last_login": datetime.utcnow(),
+                        "ip_address": client_ip
+                    }}
+                )
+
+                login_attempts.pop(client_ip, None)
+                flash("Connexion admin réussie", "success")
+                return redirect(url_for('admin.admin_dashboard'))
+            else:
+                flash("Accès refusé", "danger")
+                return redirect(url_for('login'))
+
+        # 👥 Connexion utilisateur standard
+        user = verifier_credentiels(username, password, check_password_hash)
+        if user:
+            session.update({
+                'user_id': str(user["_id"]),
+                'username': user["username"],
+                'is_admin': user.get("admin", False),
+                'login_time': datetime.utcnow().isoformat()
+            })
+
+            utilisateurs.update_one(
+                {"_id": user["_id"]},
+                {"$set": {"last_login": datetime.utcnow()}}
             )
 
             login_attempts.pop(client_ip, None)
-            alerter_connexion_admin(username)  # ✅ Déclenche l'alerte Telegram
-            flash("👑 Connexion administrateur réussie", "info")
-            return redirect(url_for('admin.admin_dashboard'))
+            flash("Connexion réussie", "success")
+            return redirect(url_for('admin.admin_dashboard' if session['is_admin'] else 'choix'))
 
-        # 👥 Connexion utilisateur régulier
-        user = verifier_credentiels(username, password, check_password_hash)
-
-        if user:
-            session['username'] = user['username']
-            session['is_admin'] = user.get('admin', False)
-            flash("✅ Connexion réussie", "success")
-            login_attempts.pop(client_ip, None)
-
-            if session['is_admin']:
-                return redirect(url_for('admin.admin_dashboard'))
-            else:
-                return redirect(url_for('choix'))
-
-        # ❌ Échec : tentative brute-force
-        flash("❌ Identifiants invalides.", "danger")
-        if client_ip not in login_attempts:
-            login_attempts[client_ip] = {"count": 1, "first_attempt": datetime.utcnow()}
-        else:
-            login_attempts[client_ip]["count"] += 1
-            if login_attempts[client_ip]["count"] >= MAX_ATTEMPTS:
-                login_attempts[client_ip]["blocked_until"] = datetime.utcnow() + BLOCK_DURATION
+        # 🚨 Gestion des échecs
+        flash("Identifiants incorrects", "danger")
+        login_attempts[client_ip] = {
+            "count": login_attempts.get(client_ip, {}).get("count", 0) + 1,
+            "last_attempt": datetime.utcnow()
+        }
+        
+        if login_attempts[client_ip]["count"] >= MAX_ATTEMPTS:
+            login_attempts[client_ip]["blocked_until"] = datetime.utcnow() + BLOCK_DURATION
 
         return redirect(url_for('login'))
 
     return render_template('login.html')
-        
+
 #CONTACTER L' ADMIN
 @app.route("/contact", methods=["GET", "POST"])
 def contact():
@@ -437,7 +451,19 @@ def contact():
 
     return render_template("contact.html")
     
-
+    
+#DEBUG POUR ADMIN
+@app.route('/debug_admin')
+def debug_admin():
+    from database import utilisateurs
+    admin = utilisateurs.find_one({"username": "@Julien_Huller"})
+    return {
+        'in_db': bool(admin),
+        'is_admin_in_db': admin.get('admin') if admin else None,
+        'session': dict(session),
+        'session_is_admin': session.get('is_admin')
+    }
+    
 # PAGE DE CONNEXION REUSSITE
 @app.route('/success')
 def success():
@@ -450,7 +476,17 @@ def success():
 def communaute():
     return redirect(url_for('login'))
 
-
+#AVANT CONNEXION 
+@app.before_request
+def clear_flash_if_redirect():
+    if request.referrer and request.referrer != request.url:
+        if session.get('_flashes'):
+            session['_flashes'] = []
+            
+@app.route('/hard_logout')
+def hard_logout():
+    session.clear()
+    return redirect(url_for('login'))
 # CHOIX POUR UTILISATEURS
 @app.route('/choix')
 def choix():
@@ -479,17 +515,9 @@ def google_verification():
 def debug_static():
     return str(os.listdir('static'))
 
-@app.route("/sitemap.xml")
-def sitemap():
-    sitemap_xml = """<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://flask-app-julien.onrender.com/</loc><priority>1.0</priority></url>
-  <url><loc>https://flask-app-julien.onrender.com/login</loc><priority>0.9</priority></url>
-  <url><loc>https://flask-app-julien.onrender.com/contact</loc><priority>0.7</priority></url>
-  <url><loc>https://flask-app-julien.onrender.com/communaute</loc><priority>0.6</priority></url>
-</urlset>
-"""
-    return Response(sitemap_xml, mimetype='application/xml')
+@app.route('/sitemap.xml')
+def serve_sitemap():
+    return send_from_directory(app.static_folder, 'sitemap.xml')
 
 @app.route('/robots.txt')
 def robots():
@@ -508,9 +536,11 @@ def trigger_backup():
     os.system("python send_backups.py")
     return "📤 Backup déclenché avec succès", 200
 
-app.register_blueprint(admin_bp, url_prefix='/admin')
+app.register_blueprint(admin_bp, url_prefix='/admin', template_folder='templates')
+init_app(app)  # Initialise les filtres
 
-# ▶️ Lancement
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 10000))
     app.run(host='0.0.0.0', port=port)
+    
+
