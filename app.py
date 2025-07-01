@@ -431,6 +431,19 @@ def contact():
 
     return render_template("contact.html")
     
+    
+#DEBUG POUR ADMIN
+@app.route('/debug_admin')
+def debug_admin():
+    from database import utilisateurs
+    admin = utilisateurs.find_one({"username": "@Julien_Huller"})
+    return {
+        'in_db': bool(admin),
+        'is_admin_in_db': admin.get('admin') if admin else None,
+        'session': dict(session),
+        'session_is_admin': session.get('is_admin')
+    }
+    
 # PAGE DE CONNEXION REUSSITE
 @app.route('/success')
 def success():
