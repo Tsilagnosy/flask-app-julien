@@ -4,138 +4,587 @@
   <meta charset="UTF-8">
   <title>Admin Panel • FruitApp</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Bootstrap & FontAwesome -->
+  <!-- Bootstrap 5 + FontAwesome + DataTables -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.min.css">
   <style>
-    body { padding-top: 56px; }
+    :root {
+      --sidebar-width: 280px;
+      --primary-color: #4e73df;
+      --secondary-color: #1cc88a;
+      --danger-color: #e74a3b;
+      --warning-color: #f6c23e;
+      --dark-color: #5a5c69;
+    }
+    
+    body {
+      padding-top: 0;
+      font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #f8f9fc;
+    }
+    
+    /* Sidebar Pro */
     .sidebar {
       height: 100vh;
       position: fixed;
       top: 0; left: 0;
-      width: 240px;
-      background-color: #343a40;
-      color: #fff;
+      width: var(--sidebar-width);
+      background: linear-gradient(180deg, var(--primary-color) 0%, #224abe 100%);
+      color: white;
+      box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+      transition: all 0.3s;
+      z-index: 1000;
     }
-    .sidebar a { color: #ddd; display: block; padding: 10px 20px; text-decoration: none; }
-    .sidebar a:hover { background-color: #495057; }
-    .dashboard-content { margin-left: 260px; padding: 20px; }
-    .table td, .table th { vertical-align: middle; }
-    .empty-field { color: #aaa; font-style: italic; }
+    
+    .sidebar-brand {
+      height: 4.375rem;
+      text-decoration: none;
+      font-size: 1.2rem;
+      font-weight: 800;
+      padding: 1.5rem 1rem;
+      text-align: center;
+      letter-spacing: 0.05rem;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .sidebar-brand-icon i {
+      font-size: 2rem;
+    }
+    
+    .sidebar-brand-text {
+      display: inline;
+      margin-left: 0.5rem;
+    }
+    
+    .sidebar-divider {
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      margin: 0 1rem 1rem;
+    }
+    
+    .sidebar-heading {
+      padding: 0 1rem;
+      font-weight: 800;
+      font-size: 0.65rem;
+      color: rgba(255, 255, 255, 0.4);
+      text-transform: uppercase;
+      letter-spacing: 0.13em;
+    }
+    
+    .nav-item {
+      position: relative;
+    }
+    
+    .nav-link {
+      color: rgba(255, 255, 255, 0.8);
+      padding: 0.75rem 1rem;
+      font-weight: 700;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      transition: all 0.3s;
+    }
+    
+    .nav-link i {
+      font-size: 0.85rem;
+      margin-right: 0.25rem;
+    }
+    
+    .nav-link:hover {
+      color: white;
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .nav-link.active {
+      color: white;
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    /* Main Content */
+    #content {
+      width: calc(100% - var(--sidebar-width));
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      transition: all 0.3s;
+    }
+    
+    /* Topbar */
+    .topbar {
+      height: 4.375rem;
+      box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+      background-color: white;
+    }
+    
+    /* Cards */
+    .card {
+      border: none;
+      border-radius: 0.35rem;
+      box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+      margin-bottom: 1.5rem;
+    }
+    
+    .card-header {
+      background-color: #f8f9fc;
+      border-bottom: 1px solid #e3e6f0;
+      padding: 1rem 1.35rem;
+      font-weight: 700;
+    }
+    
+    /* Stats Cards */
+    .card-stat {
+      border-left: 0.25rem solid;
+      overflow: hidden;
+      transition: transform 0.3s;
+    }
+    
+    .card-stat:hover {
+      transform: translateY(-5px);
+    }
+    
+    .card-stat .card-body {
+      padding: 1rem 1.5rem;
+    }
+    
+    .stat-icon {
+      font-size: 2rem;
+      opacity: 0.3;
+      position: absolute;
+      right: 1rem;
+      top: 1rem;
+    }
+    
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+    
+    .stat-label {
+      text-transform: uppercase;
+      font-weight: 700;
+      font-size: 0.7rem;
+      color: #5a5c69;
+    }
+    
+    /* DataTable */
+    .dataTables_wrapper {
+      padding: 0;
+    }
+    
+    .dataTables_filter input {
+      border-radius: 0.35rem;
+      padding: 0.375rem 0.75rem;
+      border: 1px solid #d1d3e2;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 0;
+        overflow: hidden;
+      }
+      
+      #content {
+        width: 100%;
+        margin-left: 0;
+      }
+      
+      .sidebar-toggled .sidebar {
+        width: var(--sidebar-width);
+      }
+      
+      .sidebar-toggled #content {
+        margin-left: var(--sidebar-width);
+      }
+    }
+    
+    /* Badges */
+    .badge-admin {
+      background-color: var(--primary-color);
+    }
+    
+    .badge-user {
+      background-color: var(--secondary-color);
+    }
+    
+    /* Custom Toggle Switch */
+    .form-switch .form-check-input {
+      width: 3em;
+      height: 1.5em;
+      cursor: pointer;
+    }
+    
+    /* Animation */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.5s ease-out;
+    }
   </style>
 </head>
 
-<body>
+<body class="sidebar-toggled">
   <!-- Sidebar -->
   <div class="sidebar">
-    <h4 class="text-center mt-3">👑 Admin</h4>
-    <a href="{{ url_for('admin.admin_dashboard') }}"><i class="fas fa-users"></i> Utilisateurs</a>
-    <a href="#"><i class="fas fa-chart-line"></i> Statistiques</a>
-    <a href="#"><i class="fas fa-cog"></i> Paramètres</a>
-    <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
-  </div>
-
-  <!-- Dashboard content -->
-  <div class="dashboard-content">
-    <div class="container-fluid">
-
-      <h2 class="mb-4">Tableau de bord des utilisateurs</h2>
-
-      <!-- Statistiques -->
-      <div class="row mb-4">
-        <div class="col-md-3">
-          <div class="card text-bg-primary">
-            <div class="card-body">
-              <h5 class="card-title">👥 Total</h5>
-              <p class="card-text fs-4">{{ stats.total }}</p>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="card text-bg-success">
-            <div class="card-body">
-              <h5 class="card-title">👑 Admins</h5>
-              <p class="card-text fs-4">{{ stats.admins }}</p>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="card text-bg-secondary">
-            <div class="card-body">
-              <h5 class="card-title">🙋‍♂️ Standards</h5>
-              <p class="card-text fs-4">{{ stats.standards }}</p>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="card text-bg-warning">
-            <div class="card-body">
-              <h5 class="card-title">🕐 Aujourd’hui</h5>
-              <p class="card-text fs-4">{{ stats.today }}</p>
-            </div>
-          </div>
-        </div>
+    <div class="sidebar-brand d-flex align-items-center justify-content-center">
+      <div class="sidebar-brand-icon">
+        <i class="fas fa-crown"></i>
       </div>
-
-      <!-- Table Utilisateurs -->
-      <div class="table-responsive">
-        <table class="table table-hover align-middle">
-          <thead class="table-light">
-            <tr>
-              <th>Nom</th>
-              <th>Email</th>
-              <th>Telegram</th>
-              <th>Signature</th>
-              <th>Créé</th>
-              <th>Admin</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for user in utilisateurs %}
-              <tr>
-                <td>{{ user.username }}</td>
-                <td>{{ user.email if user.email else '<span class="empty-field">–</span>' | safe }}</td>
-                <td>{{ user.telegram if user.telegram else '<span class="empty-field">–</span>' | safe }}</td>
-                <td>{{ user.signature }}</td>
-                <td>{{ user.created_at.strftime('%d/%m/%Y %H:%M') if user.created_at else '–' }}</td>
-                <td>{% if user.admin %}✅{% else %}❌{% endif %}</td>
-                <td>
-                  <div class="btn-group" role="group">
-                    <a href="{{ url_for('admin.supprimer_utilisateur', username=user.username) }}" 
-                      class="btn btn-outline-danger btn-sm"
-                      onclick="return confirm('❗Supprimer {{ user.username }} ?')">
-                      <i class="fas fa-trash-alt"></i>
-                    </a>
-                    <a href="{{ url_for('admin.toggle_active', username=user.username) }}"
-                      class="btn btn-outline-warning btn-sm">
-                      <i class="fas fa-lock"></i>
-                    </a>
-                    {% if not user.admin %}
-                    <a href="{{ url_for('admin.promouvoir_admin', username=user.username) }}" 
-                      class="btn btn-outline-success btn-sm">
-                      <i class="fas fa-user-shield"></i>
-                    </a>
-                    {% endif %}
-                  </div>
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Bouton Reset (global) -->
-      <form method="POST" action="{{ url_for('admin.reset_utilisateurs') }}" onsubmit="return confirm('⚠️ Supprimer tous les utilisateurs ?')">
-        <button class="btn btn-danger mt-3">
-          🧨 Réinitialiser les utilisateurs
-        </button>
-      </form>
-
+      <div class="sidebar-brand-text mx-3">FruitApp Admin</div>
+      <button class="btn btn-link d-md-none rounded-circle mr-3" id="sidebarToggle">
+        <i class="fa fa-bars"></i>
+      </button>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    
+    <!-- Nav Items -->
+    <div class="nav-item">
+      <a class="nav-link active" href="{{ url_for('admin.admin_dashboard') }}">
+        <i class="fas fa-fw fa-tachometer-alt"></i>
+        <span>Dashboard</span>
+      </a>
+    </div>
+    
+    <div class="sidebar-heading">Gestion</div>
+    
+    <div class="nav-item">
+      <a class="nav-link" href="{{ url_for('admin.admin_dashboard') }}">
+        <i class="fas fa-fw fa-users"></i>
+        <span>Utilisateurs</span>
+      </a>
+    </div>
+    
+    <div class="nav-item">
+      <a class="nav-link" href="#">
+        <i class="fas fa-fw fa-chart-pie"></i>
+        <span>Statistiques</span>
+      </a>
+    </div>
+    
+    <div class="nav-item">
+      <a class="nav-link" href="#">
+        <i class="fas fa-fw fa-cog"></i>
+        <span>Paramètres</span>
+      </a>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    
+    <div class="nav-item">
+      <a class="nav-link" href="{{ url_for('logout') }}">
+        <i class="fas fa-fw fa-sign-out-alt"></i>
+        <span>Déconnexion</span>
+      </a>
     </div>
   </div>
 
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+  <!-- Content Wrapper -->
+  <div id="content">
+    <!-- Topbar -->
+    <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+      <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+        <i class="fa fa-bars"></i>
+      </button>
+      
+      <!-- Topbar Search -->
+      <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
+        <div class="input-group">
+          <input type="text" class="form-control bg-light border-0 small" placeholder="Rechercher..." aria-label="Search">
+          <div class="input-group-append">
+            <button class="btn btn-primary" type="button">
+              <i class="fas fa-search fa-sm"></i>
+            </button>
+          </div>
+        </div>
+      </form>
+      
+      <!-- Topbar Navbar -->
+      <ul class="navbar-nav ml-auto">
+        <!-- Nav Item - Alerts -->
+        <li class="nav-item dropdown no-arrow mx-1">
+          <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-bs-toggle="dropdown">
+            <i class="fas fa-bell fa-fw"></i>
+            <!-- Counter - Alerts -->
+            <span class="badge badge-danger badge-counter">3+</span>
+          </a>
+        </li>
+        
+        <!-- Nav Item - Messages -->
+        <li class="nav-item dropdown no-arrow mx-1">
+          <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button" data-bs-toggle="dropdown">
+            <i class="fas fa-envelope fa-fw"></i>
+            <!-- Counter - Messages -->
+            <span class="badge badge-danger badge-counter">7</span>
+          </a>
+        </li>
+        
+        <div class="topbar-divider d-none d-sm-block"></div>
+        
+        <!-- Nav Item - User Information -->
+        <li class="nav-item dropdown no-arrow">
+          <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+            <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ session.username }}</span>
+            <img class="img-profile rounded-circle" src="https://ui-avatars.com/api/?name={{ session.username }}&background=4e73df&color=fff&size=32">
+          </a>
+        </li>
+      </ul>
+    </nav>
+    <!-- End of Topbar -->
+
+    <!-- Begin Page Content -->
+    <div class="container-fluid">
+      <!-- Page Heading -->
+      <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Tableau de bord</h1>
+        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+          <i class="fas fa-download fa-sm text-white-50"></i> Générer rapport
+        </a>
+      </div>
+
+      <!-- Content Row -->
+      <div class="row fade-in">
+        <!-- Total Users Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+          <div class="card border-left-primary shadow h-100 py-2 card-stat">
+            <div class="card-body">
+              <div class="row no-gutters align-items-center">
+                <div class="col mr-2">
+                  <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                    Utilisateurs Totaux</div>
+                  <div class="h5 mb-0 font-weight-bold text-gray-800 stat-value">{{ stats.total }}</div>
+                </div>
+                <div class="col-auto">
+                  <i class="fas fa-users fa-2x text-gray-300 stat-icon"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Admins Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+          <div class="card border-left-success shadow h-100 py-2 card-stat">
+            <div class="card-body">
+              <div class="row no-gutters align-items-center">
+                <div class="col mr-2">
+                  <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                    Administrateurs</div>
+                  <div class="h5 mb-0 font-weight-bold text-gray-800 stat-value">{{ stats.admins }}</div>
+                </div>
+                <div class="col-auto">
+                  <i class="fas fa-crown fa-2x text-gray-300 stat-icon"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Standard Users Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+          <div class="card border-left-info shadow h-100 py-2 card-stat">
+            <div class="card-body">
+              <div class="row no-gutters align-items-center">
+                <div class="col mr-2">
+                  <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                    Utilisateurs Standards</div>
+                  <div class="h5 mb-0 font-weight-bold text-gray-800 stat-value">{{ stats.standards }}</div>
+                </div>
+                <div class="col-auto">
+                  <i class="fas fa-user fa-2x text-gray-300 stat-icon"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Today Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+          <div class="card border-left-warning shadow h-100 py-2 card-stat">
+            <div class="card-body">
+              <div class="row no-gutters align-items-center">
+                <div class="col mr-2">
+                  <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                    Nouveaux Aujourd'hui</div>
+                  <div class="h5 mb-0 font-weight-bold text-gray-800 stat-value">{{ stats.today }}</div>
+                </div>
+                <div class="col-auto">
+                  <i class="fas fa-calendar-day fa-2x text-gray-300 stat-icon"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content Row -->
+      <div class="row fade-in">
+        <!-- Area Chart -->
+        <div class="col-xl-8 col-lg-7">
+          <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+              <h6 class="m-0 font-weight-bold text-primary">Activité des utilisateurs (30 jours)</h6>
+            </div>
+            <div class="card-body">
+              <div class="chart-area">
+                <canvas id="userActivityChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pie Chart -->
+        <div class="col-xl-4 col-lg-5">
+          <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+              <h6 class="m-0 font-weight-bold text-primary">Répartition des utilisateurs</h6>
+            </div>
+            <div class="card-body">
+              <div class="chart-pie pt-4 pb-2">
+                <canvas id="userDistributionChart"></canvas>
+              </div>
+              <div class="mt-4 text-center small">
+                <span class="mr-2">
+                  <i class="fas fa-circle text-primary"></i> Admins
+                </span>
+                <span class="mr-2">
+                  <i class="fas fa-circle text-success"></i> Actifs
+                </span>
+                <span class="mr-2">
+                  <i class="fas fa-circle text-info"></i> Inactifs
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DataTable -->
+      <div class="card shadow mb-4 fade-in">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+          <h6 class="m-0 font-weight-bold text-primary">Liste des utilisateurs</h6>
+          <div class="dropdown no-arrow">
+            <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown">
+              <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in">
+              <a class="dropdown-item" href="#">Exporter en CSV</a>
+              <a class="dropdown-item" href="#">Exporter en Excel</a>
+              <div class="dropdown-divider"></div>
+              <a class="dropdown-item" href="#">Filtrer les inactifs</a>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+              <thead class="thead-light">
+                <tr>
+                  <th>Nom</th>
+                  <th>Email</th>
+                  <th>Inscription</th>
+                  <th>Dernière connexion</th>
+                  <th>Statut</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for user in utilisateurs %}
+                <tr>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <img src="https://ui-avatars.com/api/?name={{ user.username }}&background=random&size=32" class="rounded-circle me-2" width="32" height="32">
+                      <div>
+                        {{ user.username }}
+                        {% if user.admin %}
+                        <span class="badge badge-admin ms-1">Admin</span>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </td>
+                  <td>{{ user.email if user.email else '<span class="text-muted">Non fourni</span>' | safe }}</td>
+                  <td>{{ user.created_at.strftime('%d/%m/%Y') if user.created_at else 'N/A' }}</td>
+                  <td>
+                    {% if user.last_login %}
+                      <span data-bs-toggle="tooltip" title="{{ user.last_login.strftime('%d/%m/%Y %H:%M') }}">
+                        {{ user.last_login|humanize }}
+                      </span>
+                    {% else %}
+                      Jamais
+                    {% endif %}
+                  </td>
+                  <td>
+                    <div class="form-check form-switch d-flex justify-content-center">
+                      <input class="form-check-input toggle-status" type="checkbox" 
+                             data-user="{{ user.username }}" 
+                             {% if user.active %}checked{% endif %}>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="btn-group" role="group">
+                      <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editUserModal" 
+                              data-user="{{ user.username }}" data-email="{{ user.email }}" data-admin="{{ user.admin }}">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <button class="btn btn-sm btn-outline-danger delete-user" data-user="{{ user.username }}">
+                        <i class="fas fa-trash-alt"></i>
+                      </button>
+                      {% if not user.admin %}
+                      <button class="btn btn-sm btn-outline-success promote-user" data-user="{{ user.username }}">
+                        <i class="fas fa-user-shield"></i>
+                      </button>
+                      {% endif %}
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Danger Zone -->
+      <div class="card border-left-danger shadow mb-4 fade-in">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-danger">Zone dangereuse</h6>
+        </div>
+        <div class="card-body">
+          <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            Ces actions sont irréversibles. Utilisez avec précaution.
+          </div>
+          <button class="btn btn-danger me-2" id="resetUsersBtn">
+            <i class="fas fa-user-slash me-2"></i>Réinitialiser les utilisateurs
+          </button>
+          <button class="btn btn-outline-danger" id="exportLogsBtn">
+            <i class="fas fa-file-export me-2"></i>Exporter les logs
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- /.container-fluid -->
+  </div>
+  <!-- End of Content Wrapper -->
+
+  <!-- Edit User Modal -->
+  <div class="modal fade" id="editUserModal" tabindex="-1" role="dialog" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editUserModalLabel">Modifier l'utilisateur</h5>
+          <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form id="editUserForm">
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="editUsername">Nom d'utilisateur</label>
+              <input type="text" class="form-control" id="editUsername" read
