@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title></title>
+</head>
+
+<body>
+  {% extends "admin_dashboard.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="mt-4">Statistiques des Visites</h1>
+    
+    <div class="row mt-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary text-white mb-4">
+                <div class="card-body">
+                    <h5>Total Visites</h5>
+                    <div class="display-4">{{ stats.total }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success text-white mb-4">
+                <div class="card-body">
+                    <h5>Visites Aujourd'hui</h5>
+                    <div class="display-4">{{ stats.today }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-info text-white mb-4">
+                <div class="card-body">
+                    <h5>Visiteurs Uniques</h5>
+                    <div class="display-4">{{ stats.unique_visitors }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-warning text-white mb-4">
+                <div class="card-body">
+                    <h5>IPs Uniques</h5>
+                    <div class="display-4">{{ stats.unique_ips }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-download mr-1"></i>
+            Export des données
+        </div>
+        <div class="card-body">
+            <a href="{{ url_for('functionality.export_visits') }}" class="btn btn-primary">
+                <i class="fas fa-file-csv"></i> Exporter les visites (CSV)
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+</body>
+
+</html>
