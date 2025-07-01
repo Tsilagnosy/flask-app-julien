@@ -12,6 +12,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 from werkzeug.security import generate_password_hash, check_password_hash
 from pymongo import MongoClient 
 from db import inserer_utilisateur, verifier_credentiels, db, est_admin, utilisateurs
+from admin_seed import admin_seed_bp
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -25,7 +26,7 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET", "clé-temporaire-par-défaut")
 app.config["SESSION_COOKIE_SECURE"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-
+app.register_blueprint(admin_seed_bp)
 # 📧 --- CONFIGURATION FLASK-MAIL ---
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
