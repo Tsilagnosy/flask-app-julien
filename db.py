@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 client = MongoClient(os.getenv("MONGO_URI"))
-db = client["ma_base"]
+db = client["Cluster0"]
 
 # 🎯 Collections
 utilisateurs = db["utilisateurs_validés"]
