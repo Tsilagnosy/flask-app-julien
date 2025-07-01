@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 from functools import wraps
+import os
 from datetime import datetime
 from database import utilisateurs  # Utilisation de la connexion centralisée
 from db import db_manager  # Pour utiliser les nouvelles méthodes
