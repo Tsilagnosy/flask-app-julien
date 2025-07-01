@@ -37,16 +37,22 @@ def admin_dashboard():
     if request.args.get('admins'):
         filtre['admin'] = True
     
-    # Correction ici : utilisation d'une liste de tuples pour sort()
-    users_cursor = db_manager.get_tous_utilisateurs(filtre=filtre)
-    users = users_cursor.sort([('created_at', -1)]) \
-                       .skip((page-1)*per_page) \
-                       .limit(per_page)
+    # Solution 1: Utilisation correcte de sort() avec PyMongo
+    users = list(utilisateurs.find(filtre)
+              .sort('created_at', -1)  # Notez la syntaxe correcte
+              .skip((page-1)*per_page)
+              .limit(per_page))
+    
+    # Solution alternative si la première ne fonctionne pas:
+    # users = list(utilisateurs.find(filtre)
+    #           .sort([('created_at', pymongo.DESCENDING)])
+    #           .skip((page-1)*per_page)
+    #           .limit(per_page))
     
     stats = {
-        'total': db_manager.compter_utilisateurs(),
-        'admins': db_manager.compter_utilisateurs({'admin': True}),
-        'today': db_manager.compter_utilisateurs({
+        'total': utilisateurs.count_documents({}),
+        'admins': utilisateurs.count_documents({'admin': True}),
+        'today': utilisateurs.count_documents({
             'created_at': {
                 '$gte': datetime.utcnow().replace(hour=0, minute=0, second=0)
             }
@@ -56,24 +62,10 @@ def admin_dashboard():
     
     return render_template(
         'admin_dashboard.html',
-        utilisateurs=list(users),  # Conversion en liste
+        utilisateurs=users,
         stats=stats,
         current_page=page
     )
-    
-# 🗑️ Suppression sécurisée
-@admin_bp.route('/supprimer/<username>')
-@admin_required
-def supprimer_utilisateur(username):
-    if username == session.get('username'):
-        flash("❌ Impossible de supprimer votre propre compte", "danger")
-    else:
-        result = utilisateurs.delete_one({'username': username})
-        if result.deleted_count:
-            flash(f"✅ Utilisateur {username} supprimé", "success")
-        else:
-            flash("⚠️ Utilisateur non trouvé", "warning")
-    return redirect(url_for('.admin_dashboard'))
 
 # 🔄 Gestion du statut admin
 @admin_bp.route('/toggle-admin/<username>')
