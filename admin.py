@@ -11,16 +11,10 @@ def admin_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
         if not session.get('is_admin'):
-            flash("🔒 Accès administrateur requis", "danger")
+            # Vide les messages flash parasites
+            session['_flashes'] = []
+            flash("Accès admin requis", "danger")
             return redirect(url_for('login'))
-        
-        # Vérification supplémentaire en base si nécessaire
-        username = session.get('username')
-        if not db_manager.est_admin(username):
-            flash("⛔ Permission administrateur révoquée", "warning")
-            session.clear()
-            return redirect(url_for('login'))
-            
         return f(*args, **kwargs)
     return wrapper
 

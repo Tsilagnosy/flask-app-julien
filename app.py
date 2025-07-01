@@ -326,6 +326,7 @@ def resend_code():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    session.clear()
     client_ip = request.remote_addr
 
     if client_ip in login_attempts:
@@ -456,7 +457,17 @@ def success():
 def communaute():
     return redirect(url_for('login'))
 
-
+#AVANT CONNEXION 
+@app.before_request
+def clear_flash_if_redirect():
+    if request.referrer and request.referrer != request.url:
+        if session.get('_flashes'):
+            session['_flashes'] = []
+            
+@app.route('/hard_logout')
+def hard_logout():
+    session.clear()
+    return redirect(url_for('login'))
 # CHOIX POUR UTILISATEURS
 @app.route('/choix')
 def choix():
