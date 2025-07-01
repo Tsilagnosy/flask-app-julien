@@ -418,7 +418,30 @@ def contact():
 
     return render_template("contact.html")
     
-    
+#A effacer Juste Apres
+@app.route('/seed-admin')
+def seed_admin():
+    if db.utilisateurs.find_one({"username": "@Julien_Huller"}):
+        return "✅ L'utilisateur admin '@Julien_Huller' existe déjà.", 200
+
+    # Création du code administrateur seedé
+    utilisateur_admin = {
+        "username": "@Julien_Huller",
+        "email": "tsilagnosyjulien@gmail.com",
+        "telegram": "",
+        "password": "admin-direct",  # ou un hash si tu préfères
+        "via": "email",
+        "signature": request.headers.get('User-Agent', 'manual-seed'),
+        "created_at": datetime.utcnow(),
+        "location": "Semé depuis /seed-admin",
+        "timestamp": datetime.utcnow(),  # tu peux l’ajuster selon ton modèle
+        "role": "admin",  # ou "utilisateur" si tu utilises le champ 'admin': True ailleurs
+        "admin": True
+    }
+
+    db.utilisateurs.insert_one(utilisateur_admin)
+    return "🚀 Admin semé avec succès !", 201
+      
 # PAGE DE CONNEXION REUSSITE
 @app.route('/success')
 def success():
