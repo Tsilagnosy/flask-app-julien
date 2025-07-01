@@ -55,7 +55,7 @@ def admin_dashboard():
     stats['standards'] = stats['total'] - stats['admins']
     
     return render_template(
-        'admin/admin_dashboard.html',
+        'admin_dashboard.html',
         utilisateurs=users,
         stats=stats,
         current_page=page
