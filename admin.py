@@ -12,8 +12,6 @@ from flask import current_app
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
-admin_bp = Blueprint('admin', __name__)
-
 def init_app(app):
     # Enregistrement direct du filtre sans décorateur
     app.jinja_env.filters['humanize'] = humanize_datetime
