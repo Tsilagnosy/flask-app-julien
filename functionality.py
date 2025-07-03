@@ -54,6 +54,12 @@ def register_tracking(app):
             user_id=session.get('user_id')
         )
 
+@functionality_bp.route('/visit-stats')
+def show_visit_stats():
+    stats = visit_tracker.get_stats()
+    return render_template('visit_stats.html', stats=stats)
+    
+    
 @functionality_bp.before_request
 def strict_admin_check():
     if not current_user.is_authenticated or not session.get('is_admin'):
