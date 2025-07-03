@@ -13,6 +13,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_required
 from database import utilisateurs  # Modification ici - Import depuis database.py
+from functionality import functionality_bp
 from admin_seed import admin_seed_bp
 from dotenv import load_dotenv
 from admin import init_app
