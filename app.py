@@ -11,14 +11,14 @@ from flask_mail import Mail, Message
 from datetime import datetime, timedelta
 from oauth2client.service_account import ServiceAccountCredentials
 from werkzeug.security import generate_password_hash, check_password_hash
-from database import utilisateurs  
+from flask_login import login_required
+from database import utilisateurs  # Modification ici - Import depuis database.py
 from admin_seed import admin_seed_bp
 from dotenv import load_dotenv
 from admin import init_app
-from functionality import init_functionality
-from functionality import functionality_bp
 
 load_dotenv()
+
 # 📦 --- CONFIGURATION ---
 SCOPE = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
 SHEET_ID = "1hLPKx-HIfAmQIcePC_owhEklo5Bd-BXviqxQvCO-kMc"
@@ -537,15 +537,11 @@ def trigger_backup():
     os.system("python send_backups.py")
     return "📤 Backup déclenché avec succès", 200
 
-def init_functionality(app):
-    app.register_blueprint(functionality_bp)
-    
 app.register_blueprint(admin_bp, url_prefix='/admin', template_folder='templates')
 init_app(app)  # Initialise les filtres
-# Fonction d'initialisation à appeler depuis app.py
-init_functionality(app)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 10000))
     app.run(host='0.0.0.0', port=port)
     
+

@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from database import utilisateurs  # Utilisation de la connexion centralisée
 from db import db_manager  # Pour utiliser les nouvelles méthodes
 import csv
+from flask_login import login_required
 from io import StringIO
 from flask_moment import Moment
 import humanize
