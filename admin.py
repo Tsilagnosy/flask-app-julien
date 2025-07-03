@@ -11,7 +11,7 @@ from flask_moment import Moment
 import humanize
 from flask import current_app
 
-admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
+#admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
 admin_bp = Blueprint('admin', __name__)
 
