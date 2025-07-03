@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title></title>
+</head>
+
+<body>
+  <h2>Partage d’écran en direct</h2>
+<button id="start">Démarrer le partage</button>
+
+<script>
+document.getElementById("start").onclick = async () => {
+  const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+
+  const pc = new RTCPeerConnection();
+  stream.getTracks().forEach(track => pc.addTrack(track, stream));
+
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+
+  const response = await fetch("https://flask-webrtc-service.onrender.com/offer", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      sdp: pc.localDescription.sdp,
+      type: pc.localDescription.type
+    })
+  });
+
+  const answer = await response.json();
+  await pc.setRemoteDescription(answer);
+};
+</script>
+</body>
+
+</html>

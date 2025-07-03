@@ -12,6 +12,8 @@ from flask import current_app
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
+admin_bp = Blueprint('admin', __name__)
+
 def init_app(app):
     # Enregistrement direct du filtre sans décorateur
     app.jinja_env.filters['humanize'] = humanize_datetime
@@ -346,3 +348,9 @@ def get_admin_logs():
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
   
+#PARTAGE D'ECRAN 
+@admin_bp.route('/screen-share')
+@login_required
+@admin_required
+def screen_share():
+    return render_template('admin/screen_share.html')
