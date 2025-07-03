@@ -11,7 +11,7 @@ from flask_mail import Mail, Message
 from datetime import datetime, timedelta
 from oauth2client.service_account import ServiceAccountCredentials
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import login_required
+from flask_login import login_required, LoginManager
 from database import utilisateurs  # Modification ici - Import depuis database.py
 from functionality import functionality_bp
 from admin_seed import admin_seed_bp
@@ -49,6 +49,10 @@ MAX_ATTEMPTS = 6
 BLOCK_DURATION = timedelta(hours=1)
 login_attempts = {}  # Stockage des tentatives de connexion
 
+#INITIALIZATION LOGINMANAGER
+login_manager=LoginManager()
+login_manager.init_app(app)
+login_manager.login_view="login"
 # Fonctions utilitaires
 def generate_validation_code():
     return str(random.randint(100000, 999999))
@@ -162,7 +166,12 @@ def saisie():
         return redirect(url_for('success'))
 
     return render_template('saisie.html')
-
+    
+# A Effacer si Cause de probleme
+@login_manager.user_loader
+def load_user(user_id):
+    return User.get_by_id(user_id)
+#=================================
 @app.route('/voir_liste')
 def voir_liste():
     if 'username' not in session:

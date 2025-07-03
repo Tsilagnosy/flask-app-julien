@@ -162,7 +162,7 @@ def toggle_active(username):
 @admin_bp.route('/supprimer/<username>')
 @admin_required
 def supprimer_utilisateur(username):
-    """Supprimer un utilisateur non-admin"""
+    """Supprimer un a un un utilisateur non-admin"""
     user = utilisateurs.find_one({"username": username})
     if user and not user.get("admin"):
         utilisateurs.delete_one({"username": username})
@@ -172,6 +172,19 @@ def supprimer_utilisateur(username):
         flash("⚠️ Impossible de supprimer un administrateur ou utilisateur introuvable", "danger")
     return redirect(url_for('.admin_dashboard'))
 
+@admin_bp.route('/reset-users', methods=['POST'])
+@admin_required
+def reset_utilisateurs():
+    """Supprimer tous les utilisateurs non-admins en une seul fois"""
+    confirm = request.form.get('confirmation')
+    if confirm == "CONFIRMER":
+        result = utilisateurs.delete_many({"admin": {"$ne": True}})
+        flash(f"🧹 {result.deleted_count} utilisateurs non-admins supprimés", "info")
+        log_admin_action("Reset global des utilisateurs")
+    else:
+        flash("❌ Confirmation invalide - aucune action effectuée", "danger")
+    return redirect(url_for('.admin_dashboard'))
+    
 @admin_bp.route('/promouvoir/<username>')
 @admin_required
 def promouvoir_admin(username):
@@ -192,20 +205,6 @@ def promouvoir_admin(username):
     flash(f"🚀 {username} promu au rang d'administrateur", "success")
     log_admin_action("Promotion admin", username)
     return redirect(url_for('.admin_dashboard'))
-
-@admin_bp.route('/reset-users', methods=['POST'])
-@admin_required
-def reset_utilisateurs():
-    """Supprimer tous les utilisateurs non-admins"""
-    confirm = request.form.get('confirmation')
-    if confirm == "CONFIRMER":
-        result = utilisateurs.delete_many({"admin": {"$ne": True}})
-        flash(f"🧹 {result.deleted_count} utilisateurs non-admins supprimés", "info")
-        log_admin_action("Reset global des utilisateurs")
-    else:
-        flash("❌ Confirmation invalide - aucune action effectuée", "danger")
-    return redirect(url_for('.admin_dashboard'))
-
 # ==============================================
 # 📊 API POUR LE DASHBOARD DYNAMIQUE
 # ==============================================
