@@ -551,9 +551,6 @@ def trigger_backup():
 """ TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")  # Garde-le dans un fichier .env ou variables d'env
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID") """
 
-token = os.environ.get("TELEGRAM_BOT_TOKEN")
-        chat_id = os.environ.get("TELEGRAM_CHAT_ID")
-
 @app.route('/envoyer_telegram', methods=['POST'])
 def envoyer_message():
     data = request.json
