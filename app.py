@@ -553,6 +553,8 @@ TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID") """
 
 @app.route('/envoyer_telegram', methods=['POST'])
 def envoyer_message():
+    token = os.getenv("TELEGRAM_BOT_TOKEN")
+    chat_id = os.getenv("TELEGRAM_CHAT_ID")
     data = request.json
 
     message = f"""📢 Nouveau formulaire soumis:
