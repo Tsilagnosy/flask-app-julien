@@ -6,7 +6,7 @@ import requests
 import random
 import humanize
 from admin import admin_bp
-from flask import Flask, session, request, redirect, url_for, render_template, abort, flash, send_from_directory, Response
+from flask import Flask, session, request, redirect, url_for, render_template, abort, flash, send_from_directory, Response, jsonify
 from flask_mail import Mail, Message
 from datetime import datetime, timedelta
 from oauth2client.service_account import ServiceAccountCredentials
@@ -546,6 +546,44 @@ def trigger_backup():
         return abort(403, description="Clé de sécurité invalide")
     os.system("python send_backups.py")
     return "📤 Backup déclenché avec succès", 200
+
+#Transfert UPDATE VERS TELEGRAME
+""" TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")  # Garde-le dans un fichier .env ou variables d'env
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID") """
+
+token = os.environ.get("TELEGRAM_BOT_TOKEN")
+        chat_id = os.environ.get("TELEGRAM_CHAT_ID")
+
+@app.route('/envoyer_telegram', methods=['POST'])
+def envoyer_message():
+    data = request.json
+
+    message = f"""📢 Nouveau formulaire soumis:
+
+🏷️ Team: {data.get('team', 'Non spécifié')}
+👤 BBS: {data.get('bbs', 'Non spécifié')}
+🚻 Sexe: {data.get('sexe', 'Non spécifié')}
+📞 Tel: {data.get('tel', 'Non spécifié')}
+📚 Lesona natao: {data.get('lesona', 'Non spécifié')}
+🌳 Tree + Cell: {data.get('tree_cell', 'Non spécifié')}
+📲 Contact Tree: {data.get('contact_tree', 'Non spécifié')}
+🏆 Catégorie: {data.get('categorie', 'Non spécifié')}
+👥 BBT nandray: {data.get('BBT', 'Non spécifié')}
+⏰ Fotoana manaraka: {data.get('next_date', 'Non spécifié')}"""
+
+    telegram_url = f"https://api.telegram.org/bot{token}/sendMessage"
+    response = requests.post(telegram_url, json={
+        "chat_id": chat_id,
+        "text": message
+    })
+
+    if response.ok:
+        return jsonify({"message": "Message bien envoyé!"})
+    else:
+        return jsonify({"error": "Échec de l'envoi Telegram"}), 500
+
+
+
 
 app.register_blueprint(admin_bp, url_prefix='/admin', template_folder='templates')
 init_app(app)  # Initialise les filtres

@@ -334,33 +334,5 @@
       <p><em>Misaotra tompoko</em> 🙏</p>
     </div>
   </div>
-  <script>
-document.querySelector('form').addEventListener('submit', async function(e) {
-    e.preventDefault();
-
-    const formData = new FormData(this);
-    const data = Object.fromEntries(formData.entries());
-
-    try {
-        const response = await fetch('/envoyer_telegram', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-            alert(result.message || 'Succès!');
-            this.reset();
-        } else {
-            alert(result.error || 'Échec de l\'envoi.');
-        }
-    } catch (err) {
-        console.error(err);
-        alert('Erreur réseau ou serveur');
-    }
-});
-</script>
 </body>
 </html>
