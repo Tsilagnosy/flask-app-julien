@@ -191,7 +191,7 @@ def voir_liste():
         records = []
 
     return render_template('liste.html', records=records)
-
+#######CREATION DE COMPTE######
 @app.route('/create_account', methods=['GET', 'POST'])
 def create_account():
     if request.method == 'POST':
@@ -227,13 +227,15 @@ def create_account():
             return redirect(url_for('create_account'))
 
         return redirect(url_for('verify'))
+
+    # Méthode GET : affichage du formulaire avec désactivation du cache
     response = make_response(render_template('create_account.html'))
     response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
     response.headers['Pragma'] = 'no-cache'
     response.headers['Expires'] = '0'
     return response
     
-
+#####VERIFICATION DU COMPTE#####
 @app.route('/verify', methods=['GET', 'POST'])
 def verify():
     code_attendu = session.get('validation_code')
@@ -304,7 +306,7 @@ def verify():
     resend_history = session.get('resend_history', [])
     nb_demandes = len([ts for ts in resend_history if datetime.utcnow() - datetime.fromisoformat(ts) < timedelta(minutes=30)])
     return render_template('verify.html', nb_demandes=nb_demandes)
-
+#######REDEMANDER LE CODE######
 @app.route('/resend_code', methods=['POST'])
 def resend_code():
     tentative = session.get('attempts', 0)
@@ -347,7 +349,7 @@ def resend_code():
         flash(f"❌ Erreur d'envoi : {e}", "danger")
 
     return redirect(url_for('verify'))
-
+########CONECTION INITIALE######
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     # Réinitialisation sécurisée de la session
@@ -435,8 +437,7 @@ def login():
     response.headers['Expires'] = '0'
     return response
     
-
-#CONTACTER L' ADMIN
+######CONTACTER L' ADMIN#######
 @app.route("/contact", methods=["GET", "POST"])
 def contact():
     if request.method == "POST":
@@ -487,7 +488,7 @@ def debug_admin():
         'session_is_admin': session.get('is_admin')
     }
     
-# PAGE DE CONNEXION REUSSITE
+### PAGE DE CONNEXION REUSSITE##
 @app.route('/success')
 def success():
     if 'username' not in session:
@@ -499,7 +500,7 @@ def success():
 def communaute():
     return redirect(url_for('login'))
 
-#AVANT CONNEXION 
+#####AVANT CONNEXION ##########
 @app.before_request
 def clear_flash_if_redirect():
     if request.referrer and request.referrer != request.url:
@@ -510,21 +511,21 @@ def clear_flash_if_redirect():
 def hard_logout():
     session.clear()
     return redirect(url_for('login'))
-# CHOIX POUR UTILISATEURS
+### CHOIX POUR UTILISATEURS######
 @app.route('/choix')
 def choix():
     if 'username' not in session:
         return redirect(url_for('login'))
     return render_template('choix.html')
  
-# Redirection pour REPORT BBT 
+#### Redirection pour REPORT BBT ###
 @app.route('/report')
 def report():
     if 'username' not in session:
         return redirect(url_for('login'))
     return render_template('report.html')
        
- # Route pour DECONNEXION  
+ #### Route pour DECONNEXION######
 @app.route('/logout')
 def logout():
     session.clear()
