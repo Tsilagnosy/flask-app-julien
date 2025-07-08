@@ -6,7 +6,7 @@ import requests
 import random
 import humanize
 from admin import admin_bp
-from flask import Flask, session, request, redirect, url_for, render_template, abort, flash, send_from_directory, Response, jsonify
+from flask import Flask, session, request, redirect, url_for, render_template, abort, flash, send_from_directory, Response, jsonify, make_response
 from flask_mail import Mail, Message
 from datetime import datetime, timedelta
 from oauth2client.service_account import ServiceAccountCredentials
@@ -164,8 +164,12 @@ def saisie():
             print("⚠️ Erreur Google Sheets :", e)
 
         return redirect(url_for('success'))
-
-    return render_template('saisie.html')
+    response = make_response(render_template('saisie.html'))
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
+    
     
 # A Effacer si Cause de probleme
 @login_manager.user_loader
@@ -223,8 +227,12 @@ def create_account():
             return redirect(url_for('create_account'))
 
         return redirect(url_for('verify'))
-
-    return render_template('create_account.html')
+    response = make_response(render_template('create_account.html')
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
+    
 
 @app.route('/verify', methods=['GET', 'POST'])
 def verify():
@@ -421,8 +429,12 @@ def login():
             login_attempts[client_ip]["blocked_until"] = datetime.utcnow() + BLOCK_DURATION
 
         return redirect(url_for('login'))
-
-    return render_template('login.html')
+     response = make_response(render_template('login.html'))
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
+    
 
 #CONTACTER L' ADMIN
 @app.route("/contact", methods=["GET", "POST"])
