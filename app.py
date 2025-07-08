@@ -376,7 +376,6 @@ def login():
         # 🔐 Connexion Admin - Version renforcée
         if username == ADMIN_USERNAME:
             if check_password_hash(ADMIN_PASSWORD_HASH, password):
-                # Configuration robuste de la session
                 session.update({
                     'user_id': str(utilisateurs.find_one({"username": username})["_id"]),
                     'username': username,
@@ -384,16 +383,10 @@ def login():
                     'login_time': datetime.utcnow().isoformat(),
                     '_fresh': True
                 })
-
-                # Mise à jour last login
                 utilisateurs.update_one(
                     {"username": username},
-                    {"$set": {
-                        "last_login": datetime.utcnow(),
-                        "ip_address": client_ip
-                    }}
+                    {"$set": {"last_login": datetime.utcnow(), "ip_address": client_ip}}
                 )
-
                 login_attempts.pop(client_ip, None)
                 flash("Connexion admin réussie", "success")
                 return redirect(url_for('admin.admin_dashboard'))
@@ -410,12 +403,10 @@ def login():
                 'is_admin': user.get("admin", False),
                 'login_time': datetime.utcnow().isoformat()
             })
-
             utilisateurs.update_one(
                 {"_id": user["_id"]},
                 {"$set": {"last_login": datetime.utcnow()}}
             )
-
             login_attempts.pop(client_ip, None)
             flash("Connexion réussie", "success")
             return redirect(url_for('admin.admin_dashboard' if session['is_admin'] else 'choix'))
@@ -426,12 +417,12 @@ def login():
             "count": login_attempts.get(client_ip, {}).get("count", 0) + 1,
             "last_attempt": datetime.utcnow()
         }
-        
         if login_attempts[client_ip]["count"] >= MAX_ATTEMPTS:
             login_attempts[client_ip]["blocked_until"] = datetime.utcnow() + BLOCK_DURATION
-
         return redirect(url_for('login'))
-     response = make_response(render_template('login.html'))
+
+    # GET : affichage du formulaire de login avec headers anti-cache
+    response = make_response(render_template('login.html'))
     response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
     response.headers['Pragma'] = 'no-cache'
     response.headers['Expires'] = '0'
