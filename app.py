@@ -227,7 +227,7 @@ def create_account():
             return redirect(url_for('create_account'))
 
         return redirect(url_for('verify'))
-    response = make_response(render_template('create_account.html')
+    response = make_response(render_template('create_account.html'))
     response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
     response.headers['Pragma'] = 'no-cache'
     response.headers['Expires'] = '0'
