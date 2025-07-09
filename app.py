@@ -551,14 +551,14 @@ def trigger_backup():
     os.system("python send_backups.py")
     return "📤 Backup déclenché avec succès", 200
 
-#Transfert UPDATE VERS TELEGRAME
+#Transfert UPDATE VERS TELEGRAM
 """ TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")  # Garde-le dans un fichier .env ou variables d'env
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID") """
 
 @app.route('/envoyer_telegram', methods=['POST'])
 def envoyer_message():
     token = os.getenv("TELEGRAM_BOT_TOKEN")
-    chat_id = os.getenv("TELEGRAM_CHAT_ID")
+    chat_id = os.getenv("TELEGRAM_CHATS_ID")
     data = request.json
 
     message = f"""📢 Nouveau formulaire soumis:
