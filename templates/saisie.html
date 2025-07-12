@@ -23,7 +23,7 @@
         }
         
         .container {
-            max-width: 500px;
+            max-width: 800px;
             width: 100%;
         }
         
@@ -326,7 +326,7 @@
         }
         
         /* Responsive */
-        @media (max-width: 676px) {
+        @media (max-width: 800px) {
             .form-container {
                 padding: 30px 20px;
             }
@@ -473,9 +473,6 @@
         <button type="submit" class="submit-btn">
           <i class="fas fa-paper-plane"></i> Envoyer
         </button>
-        <a href="{{ url_for('logout') }}" class="btn-logout">
-        <i class="fas fa-sign-out-alt"></i> Se déconnecter
-        </a>
         <p class="text-muted mt-4"><br>Un retour, une idée ou un souci ?</p>
 <a href="{{ url_for('contact') }}" class="btn btn-outline-primary">
   💌Contacter le développeur 
@@ -536,6 +533,26 @@
     if (value.length > 2) value = value.slice(0, 2) + '/' + value.slice(2);
     if (value.length > 5) value = value.slice(0, 5) + '/' + value.slice(5, 9);
     e.target.value = value;
+  });
+  window.addEventListener("pageshow", function (event) {
+    if (event.persisted) {
+      document.querySelector("form").reset(); // Réinitialise le formulaire
+    };
+        // Conversion en majuscules
+    document.getElementById('nom').addEventListener('blur', function() {
+      this.value = this.value.toUpperCase();
+    });
+
+    document.getElementById('fruit').addEventListener('blur', function() {
+      this.value = this.value.toUpperCase();
+    });
+    
+          // Conversion finale en majuscules
+      document.getElementById('nom').value = document.getElementById('nom').value.toUpperCase();
+      document.getElementById('fruit').value = document.getElementById('fruit').value.toUpperCase();
+      if (!isValid) {
+        e.preventDefault();
+      }
   });
 </script>
 </body>

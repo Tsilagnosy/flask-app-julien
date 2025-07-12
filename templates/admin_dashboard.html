@@ -231,6 +231,20 @@
     .preview-btn-group .btn {
       margin: 0 5px 5px 0;
     }
+    
+    /* New Admin Zone Styles */
+    .admin-zone-section {
+      border-left: 4px solid var(--danger-color);
+    }
+    
+    .admin-action-btn {
+      transition: all 0.2s;
+    }
+    
+    .admin-action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
   </style>
 </head>
 
@@ -350,15 +364,13 @@
         <h1 class="h3 mb-0 text-gray-800">Tableau de bord Admin</h1>
         <div class="btn-group">
           <a href="{{ url_for('functionality.export_users') }}" class="btn btn-sm btn-primary shadow-sm me-2">
-            <i class="fas fa-file-excel fa-sm text-white-50"></i> Export Utilisateurs
+            <i class="fas fa-file-excel fa-sm text-white-50"></i> Export Excel
           </a>
           <a href="{{ url_for('functionality.export_visits') }}" class="btn btn-sm btn-info shadow-sm">
-            <i class="fas fa-file-csv fa-sm text-white-50"></i> Export Visites
+            <i class="fas fa-file-csv fa-sm text-white-50"></i> Export CSV
           </a>
-         <a href="{{ url_for('functionality.visit_stats_page') }}" class="btn btn-sm btn-secondary shadow-sm ms-2">
-            📊 Statistiques de visites
-          </a>
-            <i class="fas fa-download fa-sm text-white-50"></i> Générer rapport
+          <a href="{{ url_for('functionality.visit_stats_page') }}" class="btn btn-sm btn-secondary shadow-sm ms-2">
+            <i class="fas fa-chart-pie fa-sm text-white-50"></i> Statistiques
           </a>
         </div>
       </div>
@@ -437,7 +449,8 @@
           </div>
         </div>
       </div>
-        <!-- Content Row -->
+
+      <!-- Content Row -->
       <div class="row fade-in">
         <!-- Area Chart -->
         <div class="col-xl-8 col-lg-7">
@@ -458,9 +471,6 @@
           <div class="card shadow mb-4">
             <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
               <h6 class="m-0 font-weight-bold text-primary">Répartition des utilisateurs</h6>
-              <form action="{{url_for('functionality_bp.export_users')}}" method="get">
-                <button type="submit">Exporter all Users </button>
-               </form>
             </div>
             <div class="card-body">
               <div class="chart-pie pt-4 pb-2">
@@ -482,7 +492,166 @@
         </div>
       </div>
 
-      <!-- Nouvelle Section : Prévisualisation des Pages -->
+      <!-- User Management Section -->
+      <div class="row mb-4 fade-in">
+        <div class="col-12">
+          <div class="card shadow">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+              <h6 class="m-0 font-weight-bold text-primary">Gestion des Utilisateurs</h6>
+              <div class="dropdown no-arrow">
+                <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown">
+                  <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in">
+                  <a class="dropdown-item" href="{{ url_for('admin.export_users_csv') }}">Exporter en CSV</a>
+                  <a class="dropdown-item" href="{{ url_for('functionality.export_users') }}">Exporter en Excel</a>
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item" href="{{ url_for('admin.users_full_list') }}?inactifs=1">Filtrer les inactifs</a>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+                  <thead class="thead-light">
+                    <tr>
+                      <th>Nom</th>
+                      <th>Email</th>
+                      <th>Inscription</th>
+                      <th>Dernière connexion</th>
+                      <th>Statut</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for user in utilisateurs %}
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <img src="https://ui-avatars.com/api/?name={{ user.username }}&background=random&size=32" class="rounded-circle me-2" width="32" height="32">
+                          <div>
+                            {{ user.username }}
+                            {% if user.admin %}
+                            <span class="badge badge-admin ms-1">Admin</span>
+                            {% endif %}
+                          </div>
+                        </div>
+                      </td>
+                      <td>{{ user.email if user.email else '<span class="text-muted">Non fourni</span>' | safe }}</td>
+                      <td>{{ user.created_at.strftime('%d/%m/%Y') if user.created_at else 'N/A' }}</td>
+                      <td>
+                        {% if user.last_login %}
+                          <span data-bs-toggle="tooltip" title="{{ user.last_login.strftime('%d/%m/%Y %H:%M') }}">
+                            {{ user.last_login|humanize }}
+                          </span>
+                        {% else %}
+                          Jamais
+                        {% endif %}
+                      </td>
+                      <td>
+                        <div class="form-check form-switch d-flex justify-content-center">
+                          <input class="form-check-input toggle-status" type="checkbox" 
+                                 data-user="{{ user.username }}" 
+                                 {% if user.active %}checked{% endif %}>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="btn-group" role="group">
+                          <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editUserModal" 
+                                  data-user="{{ user.username }}" data-email="{{ user.email }}" data-admin="{{ user.admin }}">
+                            <i class="fas fa-edit"></i>
+                          </button>
+                          <button class="btn btn-sm btn-outline-danger delete-user" data-user="{{ user.username }}">
+                            <i class="fas fa-trash-alt"></i>
+                          </button>
+                          {% if not user.admin %}
+                          <button class="btn btn-sm btn-outline-success promote-user" data-user="{{ user.username }}">
+                            <i class="fas fa-user-shield"></i>
+                          </button>
+                          {% endif %}
+                        </div>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin Actions Zone -->
+      <div class="row fade-in">
+        <div class="col-12">
+          <div class="card border-left-danger shadow mb-4 admin-zone-section">
+            <div class="card-header py-3">
+              <h6 class="m-0 font-weight-bold text-danger">Zone Admin - Actions Rapides</h6>
+            </div>
+            <div class="card-body">
+              <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Ces actions sont journalisées. Utilisez avec précaution.
+              </div>
+              
+              <div class="row">
+                <!-- Status Management -->
+                <div class="col-md-4 mb-3">
+                  <div class="card h-100">
+                    <div class="card-header bg-primary text-white">
+                      <h6 class="m-0">Gestion des Statuts</h6>
+                    </div>
+                    <div class="card-body">
+                      <button class="btn btn-outline-primary btn-block mb-2 admin-action-btn" id="toggleActiveBtn" data-url="{{ url_for('admin.toggle_active') }}">
+                        <i class="fas fa-user-clock me-2"></i> Activer/Désactiver
+                      </button>
+                      <button class="btn btn-outline-primary btn-block admin-action-btn" id="toggleAdminBtn" data-url="{{ url_for('admin.toggle_admin') }}">
+                        <i class="fas fa-user-shield me-2"></i> Promouvoir/Rétrograder
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- User Deletion -->
+                <div class="col-md-4 mb-3">
+                  <div class="card h-100">
+                    <div class="card-header bg-danger text-white">
+                      <h6 class="m-0">Suppression</h6>
+                    </div>
+                    <div class="card-body">
+                      <button class="btn btn-outline-danger btn-block mb-2 admin-action-btn" id="deleteUserBtn" data-url="{{ url_for('admin.supprimer_utilisateur') }}">
+                        <i class="fas fa-user-minus me-2"></i> Supprimer un utilisateur
+                      </button>
+                      <button class="btn btn-danger btn-block admin-action-btn" id="resetUsersBtn" data-url="{{ url_for('admin.reset_utilisateurs') }}">
+                        <i class="fas fa-users-slash me-2"></i> Supprimer tous (non-admins)
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Data Export -->
+                <div class="col-md-4 mb-3">
+                  <div class="card h-100">
+                    <div class="card-header bg-success text-white">
+                      <h6 class="m-0">Export de Données</h6>
+                    </div>
+                    <div class="card-body">
+                      <a href="{{ url_for('admin.export_users_csv') }}" class="btn btn-outline-success btn-block mb-2 admin-action-btn">
+                        <i class="fas fa-file-csv me-2"></i> Export CSV
+                      </a>
+                      <a href="{{ url_for('functionality.export_users') }}" class="btn btn-success btn-block admin-action-btn">
+                        <i class="fas fa-file-excel me-2"></i> Export Excel
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview Section -->
       <div class="row mb-4 fade-in" id="preview-section">
         <div class="col-12">
           <div class="card shadow">
@@ -513,180 +682,6 @@
               </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      <!-- Section Fonctionnalités Avancées -->
-      <div class="row fade-in">
-        <div class="col-12">
-          <div class="card shadow mb-4">
-            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-              <h6 class="m-0 font-weight-bold text-primary">Fonctionnalités Avancées</h6>
-            </div>
-            <div class="card-body">
-              <div class="row">
-                <div class="col-md-4 mb-4">
-                  <div class="card h-100 border-left-primary">
-                    <div class="card-body text-center">
-                      <i class="fas fa-users-cog fa-3x mb-3 text-primary"></i>
-                      <h5 class="card-title">Gestion Complète</h5>
-                      <p class="card-text">Accédez à toutes les informations utilisateurs</p>
-                      <a href="{{ url_for('functionality.users_full_list') }}" class="btn btn-primary">
-                        Voir la liste complète
-                      </a>
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="col-md-4 mb-4">
-                  <div class="card h-100 border-left-success">
-                    <div class="card-body text-center">
-                      <i class="fas fa-chart-line fa-3x mb-3 text-success"></i>
-                      <h5 class="card-title">Statistiques Visites</h5>
-                      <p class="card-text">Analysez le trafic sur votre application</p>
-                      <a href="{{ url_for('functionality.visit_stats') }}" class="btn btn-success">
-                        Voir les statistiques
-                      </a>
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="col-md-4 mb-4">
-                  <div class="card h-100 border-left-info">
-                    <div class="card-body text-center">
-                      <i class="fas fa-file-export fa-3x mb-3 text-info"></i>
-                      <h5 class="card-title">Exports</h5>
-                      <p class="card-text">Exportez les données au format Excel/CSV</p>
-                      <div class="btn-group">
-                        <a href="{{ url_for('admin.export_users') }}" class="btn btn-info me-2">
-                          <i class="fas fa-file-excel"></i>
-                        </a>
-                        <a href="{{ url_for('functionality.export_visits') }}" class="btn btn-info">
-                          <i class="fas fa-file-csv"></i>
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- DataTable -->
-      <div class="card shadow mb-4 fade-in">
-        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-          <h6 class="m-0 font-weight-bold text-primary">Liste des utilisateurs</h6>
-          <div class="dropdown no-arrow">
-            <a class="dropdown-toggle" href="{{ url_for('admin.user_activity_data') }}" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown">NBRES USER INSCRIT
-              <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
-            </a>
-            <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in">
-              <a class="dropdown-item" href="{{ url_for('admin.export_users_csv') }}">Exporter en Excel</a>
-              <a class="dropdown-item" href="{{ url_for('functionality.export_visits') }}">Exporter en CSV</a>
-              <div class="dropdown-divider"></div>
-              <a class="dropdown-item" href="{{ url_for('admin.users_full_list') }}?inactifs=1">Filtrer les inactifs</a>
-            </div>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="table-responsive">
-            <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
-              <thead class="thead-light">
-                <tr>
-                  <th>Nom</th>
-                  <th>Email</th>
-                  <th>Inscription</th>
-                  <th>Dernière connexion</th>
-                  <th>Statut</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for user in utilisateurs %}
-                <tr>
-                  <td>
-                    <div class="d-flex align-items-center">
-                      <img src="https://ui-avatars.com/api/?name={{ user.username }}&background=random&size=32" class="rounded-circle me-2" width="32" height="32">
-                      <div>
-                        {{ user.username }}
-                        {% if user.admin %}
-                        <span class="badge badge-admin ms-1">Admin</span>
-                        {% endif %}
-                      </div>
-                    </div>
-                  </td>
-                  <td>{{ user.email if user.email else '<span class="text-muted">Non fourni</span>' | safe }}</td>
-                  <td>{{ user.created_at.strftime('%d/%m/%Y') if user.created_at else 'N/A' }}</td>
-                  <td>
-                    {% if user.last_login %}
-                      <span data-bs-toggle="tooltip" title="{{ user.last_login.strftime('%d/%m/%Y %H:%M') }}">
-                        {{ user.last_login|humanize }}
-                      </span>
-                    {% else %}
-                      Jamais
-                    {% endif %}
-                  </td>
-                  <td>
-                    <div class="form-check form-switch d-flex justify-content-center">
-                      <input class="form-check-input toggle-status" type="checkbox" 
-                             data-user="{{ user.username }}" 
-                             {% if user.active %}checked{% endif %}>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="btn-group" role="group">
-                      <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editUserModal" 
-                              data-user="{{ user.username }}" data-email="{{ user.email }}" data-admin="{{ user.admin }}">
-                        <i class="fas fa-edit"></i>
-                      </button>
-                      <button class="btn btn-sm btn-outline-danger delete-user" data-user="{{ user.username }}">
-                        <i class="fas fa-trash-alt"></i>
-                      </button>
-                      {% if not user.admin %}
-                      <button class="btn btn-sm btn-outline-success promote-user" data-user="{{ user.username }}">
-                        <i class="fas fa-user-shield"></i>
-                      </button>
-                      {% endif %}
-                    </div>
-                  </td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- Danger Zone -->
-      <div class="card border-left-danger shadow mb-4 fade-in">
-        <div class="card-header py-3">
-          <h6 class="m-0 font-weight-bold text-danger">Zone dangereuse</h6>
-        </div>
-        <div class="card-body">
-          <div class="alert alert-danger">
-            <i class="fas fa-exclamation-triangle me-2"></i>
-            Ces actions sont irréversibles. Utilisez avec précaution.
-          </div>
-          <button class="btn btn-danger me-2" id="resetUsersBtn" data-url="{{ url_for('admin.reset_utilisateurs') }}">
-            <i class="fas fa-user-slash me-2"></i>Delete All Users
-          </button>
-          <button class="btn btn-danger me-2" id="resetUsersBtn" data-url="{{ url_for('admin.supprimer_utilisateur') }}">
-            <i class="fas fa-user-slash me-2"></i>Delete On User
-          </button>
-          <button class="btn btn-danger me-2" id="resetUsersBtn" data-url="{{ url_for('admin.promouvoir_admin') }}">
-            <i class="fas fa-user-slash me-2"></i>Utilisateur En Admin
-          </button>
-          <button class="btn btn-danger me-2" id="resetUsersBtn" data-url="{{ url_for('admin.toggle_active') }}">
-            <i class="fas fa-user-slash me-2"></i>Active/Desactive User
-          </button>
-          <button class="btn btn-danger me-2" id="resetUsersBtn" data-url="{{ url_for('admin.toggle_admin') }}">
-            <i class="fas fa-user-slash me-2"></i>Bascule Admin to User
-          </button>
-          <a href="{{ url_for('admin.export_logs') }}" class="btn btn-outline-danger" id="exportLogsBtn">
-            <i class="fas fa-file-export me-2"></i>Exporter les logs
-          </a>
         </div>
       </div>
     </div>
@@ -729,9 +724,9 @@
       </div>
     </div>
   </div>
-
-  <!-- Scripts -->
+    <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
@@ -742,7 +737,8 @@
       $('#dataTable').DataTable({
         language: {
           url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
-        }
+        },
+        order: [[2, 'desc']]
       });
       
       // Initialiser les tooltips
@@ -791,6 +787,52 @@
         });
       });
       
+      // Gestion des boutons de la zone admin
+      $('#toggleActiveBtn').click(function() {
+        const username = prompt("Entrez le nom d'utilisateur à modifier:");
+        if(username) {
+          window.location.href = $(this).data('url') + '/' + username;
+        }
+      });
+      
+      $('#toggleAdminBtn').click(function() {
+        const username = prompt("Entrez le nom d'utilisateur à promouvoir/rétrograder:");
+        if(username) {
+          window.location.href = $(this).data('url') + '/' + username;
+        }
+      });
+      
+      $('#deleteUserBtn').click(function() {
+        const username = prompt("Entrez le nom d'utilisateur à supprimer:");
+        if(username) {
+          if(confirm(`Confirmez la suppression de ${username} ?`)) {
+            window.location.href = $(this).data('url') + '/' + username;
+          }
+        }
+      });
+      
+      $('#resetUsersBtn').click(function() {
+        const confirmation = prompt("⚠️ Tapez 'CONFIRMER' pour supprimer tous les utilisateurs non-admins:");
+        if(confirmation === 'CONFIRMER') {
+          fetch($(this).data('url'), {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ confirmation: confirmation })
+          })
+          .then(response => response.json())
+          .then(data => {
+            if(data.status === 'success') {
+              location.reload();
+            } else {
+              alert(data.message);
+            }
+          });
+        }
+      });
+      
       // Gestion de la suppression
       $('.delete-user').click(function() {
         const username = $(this).data('user');
@@ -823,29 +865,6 @@
               'Content-Type': 'application/json',
               'X-CSRFToken': '{{ csrf_token() }}'
             }
-          })
-          .then(response => response.json())
-          .then(data => {
-            if(data.status === 'success') {
-              location.reload();
-            } else {
-              alert(data.message);
-            }
-          });
-        }
-      });
-      
-      // Gestion de la réinitialisation des utilisateurs
-      $('#resetUsersBtn').click(function() {
-        const confirmation = prompt("Tapez 'CONFIRMER' pour réinitialiser tous les utilisateurs non-admins:");
-        if(confirmation === 'CONFIRMER') {
-          fetch($(this).data('url'), {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-CSRFToken': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({ confirmation: confirmation })
           })
           .then(response => response.json())
           .then(data => {
