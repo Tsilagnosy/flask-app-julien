@@ -121,10 +121,11 @@ def admin_dashboard():
 # 🔄 ROUTES DE GESTION DES UTILISATEURS
 # ==============================================
 
-@admin_bp.route('/toggle-admin/<username>')
+@admin_bp.route('/toggle-admin/<username>', methods=['POST'])
 @admin_required
-def toggle_admin(username):
+def toggle_admin():
     """Basculer le statut admin d'un utilisateur"""
+    username = request.form.get('username')
     if username == session.get('username'):
         flash("❌ Impossible de modifier votre propre statut", "danger")
     else:
@@ -142,8 +143,9 @@ def toggle_admin(username):
 
 @admin_bp.route('/toggle-active/<username>', methods=['POST'])
 @admin_required
-def toggle_active(username):
+def toggle_active():
     """Activer/désactiver un compte utilisateur"""
+    username = request.form.get('username')
     if username == session.get('username'):
         flash("❌ Impossible de désactiver votre propre compte", "danger")
     else:
