@@ -33,7 +33,7 @@ csrf = CSRFProtect(app)
 ##Initialisation du Key#####
 app.secret_key = os.environ.get("FLASK_SECRET", "clé-temporaire-par-défaut")
 # Après app.secret_key
-app.config['WTF_CSRF_SECRET_KEY'] = "357b789ad5fab1b8fd9f14eafc011e22" #os.environ.get("FLASK_SECRET")
+app.config['WTF_CSRF_SECRET_KEY'] =os.environ.get("FLASK_SECRET")
 #app.config["SESSION_COOKIE_SECURE"] = True
 #app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 ###########NOUVELLE AJOUT####

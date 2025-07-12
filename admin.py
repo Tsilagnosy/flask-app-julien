@@ -16,9 +16,9 @@ admin_bp = Blueprint('admin', __name__)
 csrf = CSRFProtect()
 
 def init_app(app):
+    csrf.init_app(app)
     # Enregistrement direct du filtre sans décorateur
     app.jinja_env.filters['humanize'] = humanize_datetime
-    csrf.init_app(app)
     # Ou pour une initialisation au démarrage :
     with app.app_context():
         app.jinja_env.filters['humanize'] = humanize_datetime
