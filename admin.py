@@ -161,10 +161,11 @@ def toggle_active():
             log_admin_action(f"Changement statut actif ({status})", username)
     return redirect(url_for('.admin_dashboard'))
 
-@admin_bp.route('/supprimer/<username>')
+@admin_bp.route('/supprimer', methods=['POST'])
 @admin_required
-def supprimer_utilisateur(username):
+def supprimer_utilisateur():
     """Supprimer un a un un utilisateur non-admin"""
+    username = request.form.get('username')
     user = utilisateurs.find_one({"username": username})
     if user and not user.get("admin"):
         utilisateurs.delete_one({"username": username})
@@ -187,10 +188,11 @@ def reset_utilisateurs():
         flash("❌ Confirmation invalide - aucune action effectuée", "danger")
     return redirect(url_for('.admin_dashboard'))
     
-@admin_bp.route('/promouvoir/<username>')
+@admin_bp.route('/promouvoir', methods=['POST'])
 @admin_required
-def promouvoir_admin(username):
+def promouvoir_admin():
     """Promouvoir un utilisateur en admin"""
+    username = request.form.get('username')
     user = utilisateurs.find_one({"username": username})
     if not user:
         flash(f"❌ Utilisateur {username} introuvable", "danger")
