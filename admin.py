@@ -13,10 +13,10 @@ from flask import current_app
 from flask_wtf.csrf import CSRFProtect  # Ajoutez cette importation
 #admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 admin_bp = Blueprint('admin', __name__)
-csrf = CSRFProtect()
+#csrf = CSRFProtect()
 
 def init_app(app):
-    csrf.init_app(app)
+    #csrf.init_app(app)
     # Enregistrement direct du filtre sans décorateur
     app.jinja_env.filters['humanize'] = humanize_datetime
     # Ou pour une initialisation au démarrage :
