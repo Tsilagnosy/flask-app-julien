@@ -14,3 +14,4 @@ python-telegram-bot
 flask-moment
 humanize
 flask-login
+Flask-WTF
