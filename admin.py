@@ -10,7 +10,7 @@ from io import StringIO
 from flask_moment import Moment
 import humanize
 from flask import current_app
-from flask_wtf.csrf import CSRFProtect  # Ajoutez cette importation
+#from flask_wtf.csrf import CSRFProtect  # Ajoutez cette importation
 #admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 admin_bp = Blueprint('admin', __name__)
 #csrf = CSRFProtect()
@@ -121,7 +121,7 @@ def admin_dashboard():
 # 🔄 ROUTES DE GESTION DES UTILISATEURS
 # ==============================================
 
-@admin_bp.route('/toggle-admin', methods=['POST'])
+@admin_bp.route('/toggle-admin')
 @admin_required
 def toggle_admin():
     """Basculer le statut admin d'un utilisateur"""
@@ -141,7 +141,7 @@ def toggle_admin():
             log_admin_action(f"Changement statut admin ({status})", username)
     return redirect(url_for('.admin_dashboard'))
 
-@admin_bp.route('/toggle-active', methods=['POST'])
+@admin_bp.route('/toggle-active')
 @admin_required
 def toggle_active():
     """Activer/désactiver un compte utilisateur"""
@@ -161,7 +161,7 @@ def toggle_active():
             log_admin_action(f"Changement statut actif ({status})", username)
     return redirect(url_for('.admin_dashboard'))
 
-@admin_bp.route('/supprimer', methods=['POST'])
+@admin_bp.route('/supprimer')
 @admin_required
 def supprimer_utilisateur():
     """Supprimer un a un un utilisateur non-admin"""
@@ -175,7 +175,7 @@ def supprimer_utilisateur():
         flash("⚠️ Impossible de supprimer un administrateur ou utilisateur introuvable", "danger")
     return redirect(url_for('.admin_dashboard'))
 
-@admin_bp.route('/reset-users', methods=['POST'])
+@admin_bp.route('/reset-users')
 @admin_required
 def reset_utilisateurs():
     """Supprimer tous les utilisateurs non-admins en une seul fois"""
@@ -188,7 +188,7 @@ def reset_utilisateurs():
         flash("❌ Confirmation invalide - aucune action effectuée", "danger")
     return redirect(url_for('.admin_dashboard'))
     
-@admin_bp.route('/promouvoir', methods=['POST'])
+@admin_bp.route('/promouvoir')
 @admin_required
 def promouvoir_admin():
     """Promouvoir un utilisateur en admin"""
@@ -256,7 +256,7 @@ def user_stats():
 # 🛠️ ROUTES DE GESTION AVANCÉE
 # ==============================================
 
-@admin_bp.route('/api/update_user', methods=['POST'])
+@admin_bp.route('/api/update_user')
 @admin_required
 def api_update_user():
     """

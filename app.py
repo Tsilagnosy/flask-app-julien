@@ -17,7 +17,7 @@ from functionality import functionality_bp
 from admin_seed import admin_seed_bp
 from dotenv import load_dotenv
 from admin import init_app
-from flask_wtf.csrf import CSRFProtect  # Ajoutez cette importat
+#from flask_wtf.csrf import CSRFProtect  # Ajoutez cette importat
 
 load_dotenv()
 
@@ -41,7 +41,7 @@ app.config.update(
     SESSION_COOKIE_SAMESITE="Lax"
 )
 # Après avoir créé  application Flask
-csrf = CSRFProtect(app)
+#csrf = CSRFProtect(app)
 ############################
 app.register_blueprint(admin_seed_bp)
 
