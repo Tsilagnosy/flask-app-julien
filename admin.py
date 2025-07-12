@@ -140,7 +140,7 @@ def toggle_admin(username):
             log_admin_action(f"Changement statut admin ({status})", username)
     return redirect(url_for('.admin_dashboard'))
 
-@admin_bp.route('/toggle-active/<username>')
+@admin_bp.route('/toggle-active/<username>', methods=['POST'])
 @admin_required
 def toggle_active(username):
     """Activer/désactiver un compte utilisateur"""

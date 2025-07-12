@@ -767,7 +767,7 @@
         const username = $(this).data('user');
         const isActive = $(this).is(':checked');
         
-        fetch("{{ url_for('admin.toggle_user_status', username='') }}" + username, {
+        fetch("{{ url_for('admin.toggle_active', username='') }}" + username, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
