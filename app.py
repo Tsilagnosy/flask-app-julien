@@ -28,8 +28,6 @@ DATA_FOLDER = 'data'
 os.makedirs(DATA_FOLDER, exist_ok=True)
 # ###Creation App Flask#####
 app = Flask(__name__)
-# Après avoir créé  application Flask
-csrf = CSRFProtect(app)
 ##Initialisation du Key#####
 app.secret_key = os.environ.get("FLASK_SECRET", "clé-temporaire-par-défaut")
 # Après app.secret_key
@@ -42,6 +40,8 @@ app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax"
 )
+# Après avoir créé  application Flask
+csrf = CSRFProtect(app)
 ############################
 app.register_blueprint(admin_seed_bp)
 
@@ -133,6 +133,14 @@ def inserer_utilisateur(data):
 @app.route('/')
 def accueil():
     return render_template('index.html')
+###########Nouvelle####
+@app.before_request
+def csrf_protect():
+    if request.method in ("POST", "PUT", "DELETE"):
+        csrf_token = request.form.get('csrf_token') or request.headers.get('X-CSRFToken')
+        if not csrf_token or csrf_token != session.get('csrf_token'):
+            abort(400, description="CSRF token invalide")
+##########################
 
 @app.route('/saisie', methods=['GET', 'POST'])
 def saisie():

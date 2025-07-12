@@ -10,7 +10,7 @@ from io import StringIO
 from flask_moment import Moment
 import humanize
 from flask import current_app
-from flask_wtf.csrf import CSRFProtect  # Ajoutez cette importat
+from flask_wtf.csrf import CSRFProtect  # Ajoutez cette importation
 #admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 admin_bp = Blueprint('admin', __name__)
 csrf = CSRFProtect()
