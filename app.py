@@ -30,7 +30,8 @@ os.makedirs(DATA_FOLDER, exist_ok=True)
 app = Flask(__name__)
 # Après avoir créé votre application Flask
 csrf = CSRFProtect(app)
-
+# Après app.secret_key
+app.config['WTF_CSRF_SECRET_KEY'] = os.environ.get("FLASK_SECRET")
 app.secret_key = os.environ.get("FLASK_SECRET", "clé-temporaire-par-défaut")
 app.config["SESSION_COOKIE_SECURE"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
@@ -588,8 +589,6 @@ def envoyer_message():
         return jsonify({"message": "Message bien envoyé!"})
     else:
         return jsonify({"error": "Échec de l'envoi Telegram"}), 500
-
-
 
 
 app.register_blueprint(admin_bp, url_prefix='/admin', template_folder='templates')
