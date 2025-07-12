@@ -31,7 +31,7 @@ app = Flask(__name__)
 ##Initialisation du Key#####
 app.secret_key = os.environ.get("FLASK_SECRET", "clé-temporaire-par-défaut")
 # Après app.secret_key
-app.config['WTF_CSRF_SECRET_KEY'] =os.environ.get("FLASK_SECRET")
+#app.config['WTF_CSRF_SECRET_KEY'] =os.environ.get("FLASK_SECRET")
 #app.config["SESSION_COOKIE_SECURE"] = True
 #app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 ###########NOUVELLE AJOUT####
@@ -55,8 +55,8 @@ app.config['MAIL_DEFAULT_SENDER'] = 'alexcardosydonie@gmail.com'
 mail = Mail(app)
 
 # Constantes Admin
-ADMIN_USERNAME = "@Julien_Huller"
-ADMIN_PASSWORD = "silentehacking!?#"
+#ADMIN_USERNAME = "@Julien_Huller"
+#ADMIN_PASSWORD = "silentehacking!?#"
 ADMIN_PASSWORD_HASH = generate_password_hash(ADMIN_PASSWORD)
 MAX_ATTEMPTS = 6
 BLOCK_DURATION = timedelta(hours=1)
@@ -133,6 +133,7 @@ def inserer_utilisateur(data):
 @app.route('/')
 def accueil():
     return render_template('index.html')
+"""
 ###########Nouvelle####
 @app.before_request
 def csrf_protect():
@@ -141,7 +142,7 @@ def csrf_protect():
         if not csrf_token or csrf_token != session.get('csrf_token'):
             abort(400, description="CSRF token invalide")
 ##########################
-
+"""
 @app.route('/saisie', methods=['GET', 'POST'])
 def saisie():
     if 'username' not in session:
