@@ -122,7 +122,6 @@ def admin_dashboard():
 # ==============================================
 
 @admin_bp.route('/toggle-admin', methods=['POST'])
-@csrf.protect
 @admin_required
 def toggle_admin():
     """Basculer le statut admin d'un utilisateur"""
@@ -143,7 +142,6 @@ def toggle_admin():
     return redirect(url_for('.admin_dashboard'))
 
 @admin_bp.route('/toggle-active', methods=['POST'])
-@csrf.protect
 @admin_required
 def toggle_active():
     """Activer/désactiver un compte utilisateur"""
@@ -164,7 +162,6 @@ def toggle_active():
     return redirect(url_for('.admin_dashboard'))
 
 @admin_bp.route('/supprimer', methods=['POST'])
-@csrf.protect
 @admin_required
 def supprimer_utilisateur():
     """Supprimer un a un un utilisateur non-admin"""
@@ -179,7 +176,6 @@ def supprimer_utilisateur():
     return redirect(url_for('.admin_dashboard'))
 
 @admin_bp.route('/reset-users', methods=['POST'])
-@csrf.protect
 @admin_required
 def reset_utilisateurs():
     """Supprimer tous les utilisateurs non-admins en une seul fois"""
@@ -193,7 +189,6 @@ def reset_utilisateurs():
     return redirect(url_for('.admin_dashboard'))
     
 @admin_bp.route('/promouvoir', methods=['POST'])
-@csrf.protect
 @admin_required
 def promouvoir_admin():
     """Promouvoir un utilisateur en admin"""
@@ -262,7 +257,6 @@ def user_stats():
 # ==============================================
 
 @admin_bp.route('/api/update_user', methods=['POST'])
-@csrf.exempt
 @admin_required
 def api_update_user():
     """
@@ -358,7 +352,7 @@ def get_admin_logs():
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
   
-#PARTAGE D'ECRAN 
+#PARTAGE D'ECRAN Pour FONCTIONALITY FUTURES#####
 @admin_bp.route('/screen-share')
 @login_required
 @admin_required
