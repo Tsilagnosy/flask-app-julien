@@ -599,7 +599,7 @@
                       <h6 class="m-0">Gestion des Statuts</h6>
                     </div>
                     <div class="card-body">
-                      <button class="btn btn-outline-primary btn-block mb-2 admin-action-btn" id="toggleActiveBtn" data-url="{{ url_for('admin.toggle_active') }}">
+                      <button class="btn btn-outline-primary btn-block mb-2 admin-action-btn" id="toggleActiveBtn" data-url="{{ url_for('admin.toggle_active', username='') }}">
                         <i class="fas fa-user-clock me-2"></i> Activer/Désactiver
                       </button>
                       <button class="btn btn-outline-primary btn-block admin-action-btn" id="toggleAdminBtn" data-url="{{ url_for('admin.toggle_admin') }}">
