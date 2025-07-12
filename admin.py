@@ -13,11 +13,12 @@ from flask import current_app
 from flask_wtf.csrf import CSRFProtect  # Ajoutez cette importat
 #admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 admin_bp = Blueprint('admin', __name__)
+csrf = CSRFProtect()
 
 def init_app(app):
     # Enregistrement direct du filtre sans décorateur
     app.jinja_env.filters['humanize'] = humanize_datetime
-    
+    csrf.init_app(app)
     # Ou pour une initialisation au démarrage :
     with app.app_context():
         app.jinja_env.filters['humanize'] = humanize_datetime
@@ -121,6 +122,7 @@ def admin_dashboard():
 # ==============================================
 
 @admin_bp.route('/toggle-admin', methods=['POST'])
+@csrf.protect
 @admin_required
 def toggle_admin():
     """Basculer le statut admin d'un utilisateur"""
@@ -141,6 +143,7 @@ def toggle_admin():
     return redirect(url_for('.admin_dashboard'))
 
 @admin_bp.route('/toggle-active', methods=['POST'])
+@csrf.protect
 @admin_required
 def toggle_active():
     """Activer/désactiver un compte utilisateur"""
@@ -161,6 +164,7 @@ def toggle_active():
     return redirect(url_for('.admin_dashboard'))
 
 @admin_bp.route('/supprimer', methods=['POST'])
+@csrf.protect
 @admin_required
 def supprimer_utilisateur():
     """Supprimer un a un un utilisateur non-admin"""
@@ -175,6 +179,7 @@ def supprimer_utilisateur():
     return redirect(url_for('.admin_dashboard'))
 
 @admin_bp.route('/reset-users', methods=['POST'])
+@csrf.protect
 @admin_required
 def reset_utilisateurs():
     """Supprimer tous les utilisateurs non-admins en une seul fois"""
@@ -188,6 +193,7 @@ def reset_utilisateurs():
     return redirect(url_for('.admin_dashboard'))
     
 @admin_bp.route('/promouvoir', methods=['POST'])
+@csrf.protect
 @admin_required
 def promouvoir_admin():
     """Promouvoir un utilisateur en admin"""
@@ -256,6 +262,7 @@ def user_stats():
 # ==============================================
 
 @admin_bp.route('/api/update_user', methods=['POST'])
+@csrf.exempt
 @admin_required
 def api_update_user():
     """

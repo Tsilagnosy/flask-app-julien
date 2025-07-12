@@ -26,15 +26,23 @@ SCOPE = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/au
 SHEET_ID = "1hLPKx-HIfAmQIcePC_owhEklo5Bd-BXviqxQvCO-kMc"
 DATA_FOLDER = 'data'
 os.makedirs(DATA_FOLDER, exist_ok=True)
-
+# ###Creation App Flask#####
 app = Flask(__name__)
-# Après avoir créé votre application Flask
+# Après avoir créé  application Flask
 csrf = CSRFProtect(app)
+##Initialisation du Key#####
+app.secret_key = os.environ.get("FLASK_SECRET", "clé-temporaire-par-défaut")
 # Après app.secret_key
 app.config['WTF_CSRF_SECRET_KEY'] = os.environ.get("FLASK_SECRET")
-app.secret_key = os.environ.get("FLASK_SECRET", "clé-temporaire-par-défaut")
-app.config["SESSION_COOKIE_SECURE"] = True
-app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+#app.config["SESSION_COOKIE_SECURE"] = True
+app.#config["SESSION_COOKIE_SAMESITE"] = "Lax"
+###########NOUVELLE AJOUT####
+app.config.update(
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE='Lax'
+)
+############################
 app.register_blueprint(admin_seed_bp)
 
 # 📧 --- CONFIGURATION FLASK-MAIL --
