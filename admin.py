@@ -121,7 +121,7 @@ def admin_dashboard():
 # 🔄 ROUTES DE GESTION DES UTILISATEURS
 # ==============================================
 
-@admin_bp.route('/toggle-admin/<username>', methods=['POST'])
+@admin_bp.route('/toggle-admin', methods=['POST'])
 @admin_required
 def toggle_admin():
     """Basculer le statut admin d'un utilisateur"""
@@ -141,7 +141,7 @@ def toggle_admin():
             log_admin_action(f"Changement statut admin ({status})", username)
     return redirect(url_for('.admin_dashboard'))
 
-@admin_bp.route('/toggle-active/<username>', methods=['POST'])
+@admin_bp.route('/toggle-active', methods=['POST'])
 @admin_required
 def toggle_active():
     """Activer/désactiver un compte utilisateur"""
