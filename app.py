@@ -35,7 +35,7 @@ app.secret_key = os.environ.get("FLASK_SECRET", "clé-temporaire-par-défaut")
 # Après app.secret_key
 app.config['WTF_CSRF_SECRET_KEY'] = os.environ.get("FLASK_SECRET")
 #app.config["SESSION_COOKIE_SECURE"] = True
-app.#config["SESSION_COOKIE_SAMESITE"] = "Lax"
+#app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 ###########NOUVELLE AJOUT####
 app.config.update(
     SESSION_COOKIE_SECURE=True,
