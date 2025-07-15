@@ -55,8 +55,8 @@ app.config['MAIL_DEFAULT_SENDER'] = 'alexcardosydonie@gmail.com'
 mail = Mail(app)
 
 # Constantes Admin
-ADMIN_USERNAME = os.getenv(ADMIN_USERNAME)
-ADMIN_PASSWORD = os.getenv(ADMIN_PASSWORD)
+ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 ADMIN_PASSWORD_HASH = generate_password_hash(ADMIN_PASSWORD)
 MAX_ATTEMPTS = 6
 BLOCK_DURATION = timedelta(hours=1)
