@@ -55,8 +55,8 @@ app.config['MAIL_DEFAULT_SENDER'] = 'alexcardosydonie@gmail.com'
 mail = Mail(app)
 
 # Constantes Admin
-ADMIN_USERNAME = "@Julien_Huller"
-ADMIN_PASSWORD = "silentehacking!?#"
+ADMIN_USERNAME = os.getenv(ADMIN_USERNAME)
+ADMIN_PASSWORD = os.getenv(ADMIN_PASSWORD)
 ADMIN_PASSWORD_HASH = generate_password_hash(ADMIN_PASSWORD)
 MAX_ATTEMPTS = 6
 BLOCK_DURATION = timedelta(hours=1)
@@ -488,7 +488,7 @@ def contact():
 
     return render_template("contact.html")
     
-    
+"""    
 #DEBUG POUR ADMIN
 @app.route('/debug_admin')
 def debug_admin():
@@ -499,7 +499,7 @@ def debug_admin():
         'is_admin_in_db': admin.get('admin') if admin else None,
         'session': dict(session),
         'session_is_admin': session.get('is_admin')
-    }
+    } """
     
 ### PAGE DE CONNEXION REUSSITE##
 @app.route('/success')
