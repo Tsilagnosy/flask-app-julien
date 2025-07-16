@@ -493,7 +493,7 @@ def contact():
 @app.route('/debug_admin')
 def debug_admin():
     from database import utilisateurs
-    admin = utilisateurs.find_one({"username": "@Julien_Huller"})
+    admin = utilisateurs.find_one({"username": " "})
     return {
         'in_db': bool(admin),
         'is_admin_in_db': admin.get('admin') if admin else None,
