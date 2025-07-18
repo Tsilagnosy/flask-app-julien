@@ -208,13 +208,14 @@ def voir_liste():
 
         sheet = client.open_by_key(SHEET_ID).worksheet("Donnees_Site_Users")
         raw_data = sheet.get_all_values()
+        print(raw_data)
 
         # 🧹 Standardisation des en-têtes (colonne A à P = 0 à 15)
         headers = [col.strip() for col in raw_data[0][:16]]
 
         # 🧠 Transformation en dictionnaire robuste
         records = []
-        for row in raw_data[2:]:
+        for row in raw_data[1:]:
             values = row[:16] + [None] * (16 - len(row))  # Complète la ligne si elle est trop courte
             record = dict(zip(headers, values))
             records.append(record)
