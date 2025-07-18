@@ -208,7 +208,7 @@ def voir_liste():
 
         # 🔍 Lecture du range spécifique A1:P500
         sheet = client.open_by_key(SHEET_ID).worksheet("Donnees_Site_Users")
-        raw_data = sheet.get("Donnees_Site_Users!A1:P500")["values"]
+        raw_data = sheet.get("A1:P500")["values"]
 
         # 🧠 Transformation des lignes en dictionnaires (comme get_all_records)
         headers = raw_data[0] if raw_data else []
