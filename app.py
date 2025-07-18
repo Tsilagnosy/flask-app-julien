@@ -216,7 +216,7 @@ def voir_liste():
 
         # 🧠 Transformation en liste de dictionnaires (avec en-tête)
         headers = raw_data[0] if raw_data else []
-        records = [dict(zip(headers, row)) for row in raw_data]
+        records = [dict(zip(headers, row)) for row in raw_data[1:]]
 
     except Exception as e:
         print("⚠️ Erreur lecture Google Sheets :", e)
