@@ -208,21 +208,24 @@ def voir_liste():
         creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, SCOPE)
         client = gspread.authorize(creds)
 
-        # 📄 Accès à la feuille "DonneesSite_Users"
+        # 📄 Accès à la feuille "Donnees_Site_Users"
         sheet = client.open_by_key(SHEET_ID).worksheet("Donnees_Site_Users")
 
-        # 🔍 Lecture du range A1:P500
-        raw_data = sheet.get("A1:P500")
+        # 🔍 Lecture de toutes les lignes
+        raw_data = sheet.get_all_values()
 
-        # 🧠 Transformation en liste de dictionnaires (avec en-tête)
-        headers = raw_data[0] if raw_data else []
-        records = [dict(zip(headers, row)) for row in raw_data[1:]]
+        # ✂️ Coupe chaque ligne à la colonne P (index 15 car 0-based)
+        trimmed_data = [row[:16] for row in raw_data]  # A à P = 16 colonnes
+
+        # 🧠 Transformation en liste de dictionnaires
+        headers = trimmed_data[0] if trimmed_data else []
+        records = [dict(zip(headers, row)) for row in trimmed_data[1:]]
 
     except Exception as e:
         print("⚠️ Erreur lecture Google Sheets :", e)
         records = []
 
-    # 📄 Rendu HTML avec les données
+    # 📄 Rendu HTML avec les données filtrées
     return render_template('liste.html', records=records)
 #######CREATION DE COMPTE######
 @app.route('/create_account', methods=['GET', 'POST'])
