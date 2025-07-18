@@ -198,34 +198,31 @@ def load_user(user_id):
 #=================================
 @app.route('/voir_liste')
 def voir_liste():
-    # 🛡️ Vérification de session
     if 'username' not in session:
         return redirect(url_for('login'))
 
     try:
-        # 🔐 Connexion aux credentials Google Sheets
         creds_dict = json.loads(os.environ["GOOGLE_CREDENTIALS_JSON"])
         creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, SCOPE)
         client = gspread.authorize(creds)
 
-        # 📄 Accès à la feuille "Donnees_Site_Users"
         sheet = client.open_by_key(SHEET_ID).worksheet("Donnees_Site_Users")
-
-        # 🔍 Lecture de toutes les lignes
         raw_data = sheet.get_all_values()
 
-        # ✂️ Coupe chaque ligne à la colonne P (index 15 car 0-based)
-        trimmed_data = [row[:16] for row in raw_data]  # A à P = 16 colonnes
+        # 🧹 Standardisation des en-têtes (colonne A à P = 0 à 15)
+        headers = [col.strip() for col in raw_data[0][:16]]
 
-        # 🧠 Transformation en liste de dictionnaires
-        headers = trimmed_data[0] if trimmed_data else []
-        records = [dict(zip(headers, row)) for row in trimmed_data[1:]]
+        # 🧠 Transformation en dictionnaire robuste
+        records = []
+        for row in raw_data[1:]:
+            values = row[:16] + [None] * (16 - len(row))  # Complète la ligne si elle est trop courte
+            record = dict(zip(headers, values))
+            records.append(record)
 
     except Exception as e:
         print("⚠️ Erreur lecture Google Sheets :", e)
         records = []
 
-    # 📄 Rendu HTML avec les données filtrées
     return render_template('liste.html', records=records)
 #######CREATION DE COMPTE######
 @app.route('/create_account', methods=['GET', 'POST'])
