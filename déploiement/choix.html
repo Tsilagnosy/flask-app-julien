@@ -170,105 +170,37 @@
     </div>
 
     <div class="options-container">
-        <form action="{{ url_for('voir_liste') }}" method="get" id="voirListeForm">
+        <form action="{{ url_for('voir_liste') }}" method="get">
             <button type="submit" class="option-card">
                 <div class="option-icon">📄</div>
                 <div class="option-text">Voir les fruits enregistrés</div>
             </button>
         </form>
 
-        <form action="{{ url_for('saisie') }}" method="get" id="saisieForm">
+        <form action="{{ url_for('saisie') }}" method="get">
             <button type="submit" class="option-card">
                 <div class="option-icon">🍊</div>
                 <div class="option-text">PC/PI REPORT</div>
             </button>
         </form>
-          <form action="{{ url_for('chatgi') }}" method="get" id="chatgiForm">
+          <form action="{{ url_for('chatgi') }}" method="get">
             <button type="submit" class="option-card">
                 <div class="option-icon">🍐</div>
                 <div class="option-text">CHATGI REPORT</div>
             </button>
         </form>
-        <form action="{{ url_for('report') }}" method="get" id="reportForm">
+        <form action="{{ url_for('report') }}" method="get">
             <button type="submit" class="option-card">
                 <div class="option-icon">📝</div>
                 <div class="option-text">BBT REPORT/MAJ LESONA</div>
             </button>
         </form>
-         <form action="{{ url_for('contact') }}" method="get" id="contactForm">
+         <form action="{{ url_for('contact') }}" method="get">
             <button type="submit" class="option-card">
                 <div class="option-icon">📠</div>
                 <div class="option-text">FANGATAHANA/ FANAMARIHANA</div>
             </button>
         </form>
     </div>
-
-    <script>
-        // Liste des utilisateurs autorisés pour la route 'voir_liste'
-        const authorizedUsers = ['LAHINIRIKO', 'TIAVINA', 'CYNTHIA','LEONARDINE','ANGELA','LOVANIAINA']; // Ajoutez les usernames autorisés ici
-        
-        // Fonction pour vérifier l'accès à la page 'voir_liste'
-        function checkAccessToVoirListe() {
-            const currentUser = "{{ session['username'] }}"; // Récupère le username de la session
-            
-            // Vérifie si l'utilisateur est connecté (session valide)
-            if (currentUser && currentUser !== "None") {
-                // Vérifie si l'utilisateur n'est pas dans la liste des autorisés
-                if (!authorizedUsers.includes(currentUser)) {
-                    const voirListeForm = document.getElementById('voirListeForm');
-                    
-                    // Désactive le formulaire et change le style pour indiquer qu'il n'est pas accessible
-                    voirListeForm.querySelector('button').disabled = true;
-                    voirListeForm.querySelector('.option-card').style.opacity = '0.6';
-                    voirListeForm.querySelector('.option-card').style.cursor = 'not-allowed';
-                    voirListeForm.querySelector('.option-card').onclick = function(e) {
-                        e.preventDefault();
-                        alert("Désolé, vous n'avez pas l'autorisation d'accéder à cette fonctionnalité.");
-                    };
-                }
-            }
-        }
-
-        // Fonction pour effacer les données des formulaires après soumission
-        function clearFormData() {
-            // Cette fonction est surtout utile pour les formulaires POST
-            // Pour les formulaires GET comme dans ce cas, l'effacement se fait côté serveur
-            // Mais nous pouvons ajouter un gestionnaire pour le cas où
-            document.querySelectorAll('form').forEach(form => {
-                form.addEventListener('submit', function() {
-                    // Effacer les champs input s'il y en a (même si dans ce template il n'y en a pas)
-                    this.querySelectorAll('input').forEach(input => {
-                        input.value = '';
-                    });
-                });
-            });
-        }
-
-        // Gestion du cache pour empêcher la réaffichage des données après retour
-        function disablePageCache() {
-            // Ces meta tags peuvent aider à empêcher la mise en cache
-            const meta = document.createElement('meta');
-            meta.httpEquiv = "Cache-Control";
-            meta.content = "no-cache, no-store, must-revalidate";
-            document.head.appendChild(meta);
-            
-            const meta2 = document.createElement('meta');
-            meta2.httpEquiv = "Pragma";
-            meta2.content = "no-cache";
-            document.head.appendChild(meta2);
-            
-            const meta3 = document.createElement('meta');
-            meta3.httpEquiv = "Expires";
-            meta3.content = "0";
-            document.head.appendChild(meta3);
-        }
-
-        // Initialisation des fonctions au chargement de la page
-        document.addEventListener('DOMContentLoaded', function() {
-            checkAccessToVoirListe();
-            clearFormData();
-            disablePageCache();
-        });
-    </script>
 </body>
 </html>

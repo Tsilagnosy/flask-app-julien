@@ -554,6 +554,52 @@
         e.preventDefault();
       }
   });
+  <script>
+  // Fonction pour nettoyer complètement le formulaire
+  function clearForm() {
+    const form = document.getElementById('main-form');
+    
+    // Réinitialiser tous les champs input
+    const inputs = form.querySelectorAll('input[type="text"], input[type="tel"], input[type="number"]');
+    inputs.forEach(input => {
+      input.value = '';
+    });
+    
+    // Réinitialiser le champ gender
+    document.getElementById('gender').value = '';
+    document.querySelectorAll('.gender-option').forEach(opt => {
+      opt.classList.remove('selected');
+    });
+    
+    // Réinitialiser le select
+    const religionSelect = document.getElementById('religion-select');
+    religionSelect.value = '';
+    religionSelect.setAttribute('name', 'religion');
+    
+    // Réinitialiser le champ religion personnalisée
+    const customReligion = document.getElementById('custom-religion');
+    customReligion.value = '';
+    customReligion.style.display = 'none';
+    customReligion.removeAttribute('name');
+  }
+
+  // Nettoyage après soumission
+  document.getElementById('main-form').addEventListener('submit', function() {
+    // Utiliser setTimeout pour s'assurer que le nettoyage se fait après l'envoi
+    setTimeout(clearForm, 0);
+  });
+
+  // Gestion du retour arrière
+  window.addEventListener('pageshow', function(event) {
+    if (event.persisted) {
+      clearForm();
+    }
+  });
+
+  // Nettoyage au chargement si c'est un retour arrière
+  if (window.performance && window.performance.navigation.type === window.performance.navigation.TYPE_BACK_FORWARD) {
+    clearForm();
+  });
 </script>
 </body>
 </html>

@@ -208,7 +208,7 @@ def voir_liste():
 
         sheet = client.open_by_key(SHEET_ID).worksheet("Donnees_Site_Users")
         raw_data = sheet.get_all_values()
-        print(raw_data)
+        #print(raw_data)
 
         # 🧹 Standardisation des en-têtes (colonne A à P = 0 à 15)
         headers = [col.strip() for col in raw_data[1][:16]]
@@ -512,6 +512,54 @@ def debug_admin():
         'session': dict(session),
         'session_is_admin': session.get('is_admin')
     } """
+    
+#########CHATGI REPORT ########
+@app.route('/chatgi', methods=['GET', 'POST'])
+def chatgi():
+    if request.method == 'POST':
+        # 📦 Récupération des données du formulaire
+        data = {
+            'nom': request.form.get('hazonaina'),
+            'cell': request.form.get('sela'),
+            'fruit': request.form.get('voankazo'),
+            'num_fruit': request.form.get('nomerao'),
+            'adresse': request.form.get('adiresy'),
+            'gender': request.form.get('genre'),
+            'Fotoana': request.form.get('fotoana'),
+        }
+
+        try:
+            # 🔐 Connexion sécurisée à Google Sheets
+            creds_dict = json.loads(os.environ["GOOGLE_CREDENTIALS_JSON"])
+            creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, SCOPES)
+            client = gspread.authorize(creds)
+
+            # 📄 Accès à la feuille "AllChatgi"
+            sheet = client.open_by_key(SPREADSHEET_ID).worksheet("AllChatgi")
+            existing_data = sheet.get_all_values()[1:]  # Ignore l'en-tête
+
+            # 🔍 Vérification des doublons sur fruit + num_fruit
+            for row in existing_data:
+                if len(row) >= 4:
+                    existing_fruit = row[2].strip()
+                    existing_num = row[3].strip()
+                    if (existing_fruit == data['fruit'].strip() and
+                        existing_num == data['num_fruit'].strip()):
+                        flash("⚠️ Ce fruit avec ce numéro a déjà été enregistré.")
+                        return redirect(url_for('chatgi'))
+
+            # 📝 Ajout des données si pas de doublon
+            sheet.append_row(list(data.values()))
+            flash("✅ Rapport enregistré avec succès.")
+            return redirect(url_for('success'))
+
+        except Exception as e:
+            print("⚠️ Erreur Google Sheets :", e)
+            flash("Une erreur est survenue lors de l'enregistrement.")
+            return redirect(url_for('chatgi'))
+
+    # Affiche le formulaire si GET
+    return render_template("chatgi.html") 
     
 ### PAGE DE CONNEXION REUSSITE##
 @app.route('/success')

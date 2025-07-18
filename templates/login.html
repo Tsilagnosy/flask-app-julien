@@ -181,6 +181,31 @@
         toggleIcon.textContent = "🔒";
       }
     }
+  // Fonction pour nettoyer le formulaire de login
+  function clearLoginForm() {
+    document.querySelector('input[name="username"]').value = '';
+    document.getElementById('password').value = '';
+    // Remettre l'icône du mot de passe en mode fermé
+    document.querySelector('.password-toggle').textContent = '🔒';
+    document.getElementById('password').type = 'password';
+  }
+
+  // Nettoyer le formulaire si la page est chargée depuis le cache (retour arrière)
+  window.addEventListener('pageshow', function(event) {
+    if (event.persisted) {
+      clearLoginForm();
+    }
+  });
+
+  // Nettoyer aussi au chargement si navigation TYPE_BACK_FORWARD
+  if (window.performance && window.performance.navigation.type === window.performance.navigation.TYPE_BACK_FORWARD) {
+    clearLoginForm();
+  }
+
+  // Optionnel: Nettoyer après soumission si vous restez sur la page
+  document.querySelector('form').addEventListener('submit', function() {
+    setTimeout(clearLoginForm, 0);
+  });
   </script>
 
 </body>

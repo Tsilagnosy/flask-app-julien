@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulaire Professionnel</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color:white;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 300;
+            background-color:#FFEEAE;
+          
+        }
+        
+        .form-container {
+            background-color:#FFFFE0;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+          
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        input[type="text"],
+        input[type="tel"],
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus,
+        input[type="tel"]:focus,
+        select:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 5px;
+        }
+        
+        .radio-option {
+            display: flex;
+            align-items: center;
+        }
+        
+        .radio-option input {
+            margin-right: 5px;
+        }
+        
+        .submit-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: block;
+            width: 100%;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+        
+        .submit-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .required:after {
+            content: " *";
+            color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <h1>TATITRA FIJINJANA</h1>
+    
+    <div class="form-container">
+        <form id="monFormulaire" method="POST" action="{{ url_for('chatgi') }}" onsubmit="return validerFormulaire()">
+            <!-- Section IDENTIFIANT -->
+            <div class="form-group">
+                <label for="hazonaina" class="required">HAZONAINA</label>
+                <input type="text" id="hazonaina" name="hazonaina" 
+                       onblur="formatHazonaina(this)" 
+                       placeholder="Entrez le hazoaina" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="sela">SELA</label>
+                <input type="text" id="sela" name="sela" 
+                       maxlength="5" 
+                       placeholder="Max 5 caractères">
+            </div>
+            
+            <!-- Section VOANKAZO -->
+            <div class="form-group">
+                <label for="voankazo" class="required">VOANKAZO</label>
+                <input type="text" id="voankazo" name="voankazo" 
+                       placeholder="Type de voankazo" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="nomerao" class="required">NOMERAO</label>
+                <input type="tel" id="nomerao" name="nomerao" 
+                       pattern="[0-9]{10}" 
+                       placeholder="Numéro de téléphone" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="adiresy">ADIRESY</label>
+                <input type="text" id="adiresy" name="adiresy" 
+                       placeholder="Adresse complète">
+            </div>
+            
+            <!-- Section GENRE -->
+            <div class="form-group">
+                <label class="required">Genre</label>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" id="homme" name="genre" value="homme" required>
+                        <label for="homme">Homme</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="femme" name="genre" value="femme">
+                        <label for="femme">Femme</label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Section FOTOANA -->
+            <div class="form-group">
+                <label for="fotoana" class="required">FOTOANA</label>
+                <input type="text" id="fotoana" name="fotoana" 
+                       placeholder="Ex: jeudi 09H" required>
+            </div>
+            
+            <button type="submit" class="submit-btn">Envoyer</button>
+        </form>
+    </div>
+    
+    <script>
+        // Fonction pour formater le HAZONAINA en majuscules et supprimer les espaces inutiles
+        function formatHazonaina(input) {
+            if (input.value) {
+                // Supprimer les espaces multiples et les espaces en début/fin
+                let valeur = input.value.trim().replace(/\s+/g, ' ');
+                // Convertir en majuscules
+                input.value = valeur.toUpperCase();
+            }
+        }
+        
+        // Fonction de validation du formulaire
+        function validerFormulaire() {
+            // Vous pouvez ajouter des validations supplémentaires ici si nécessaire
+            console.log("Formulaire validé, envoi en cours...");
+            
+            // Nettoyer le formulaire après soumission
+            setTimeout(clearForm, 0);
+            
+            return true; // Permet l'envoi réel du formulaire
+        }
+        
+        // Fonction pour nettoyer complètement le formulaire
+        function clearForm() {
+            const form = document.getElementById('monFormulaire');
+            
+            // Réinitialiser tous les champs input
+            const inputs = form.querySelectorAll('input[type="text"], input[type="tel"]');
+            inputs.forEach(input => {
+                input.value = '';
+            });
+            
+            // Réinitialiser les boutons radio
+            const radios = form.querySelectorAll('input[type="radio"]');
+            radios.forEach(radio => {
+                radio.checked = false;
+            });
+            
+            // Réinitialiser les sélections (si jamais vous ajoutez des select)
+            const selects = form.querySelectorAll('select');
+            selects.forEach(select => {
+                select.selectedIndex = 0;
+            });
+        }
+        
+        // Empêcher la restauration du cache du navigateur
+        window.onpageshow = function(event) {
+            if (event.persisted) {
+                clearForm();
+            }
+        };
+        
+        // Nettoyer le formulaire au chargement de la page (au cas où)
+        document.addEventListener('DOMContentLoaded', function() {
+            // Vérifier si la page est chargée depuis le cache
+            if (window.performance && window.performance.navigation.type === window.performance.navigation.TYPE_BACK_FORWARD) {
+                clearForm();
+            }
+        });
+    </script>
+</body>
+</html>
