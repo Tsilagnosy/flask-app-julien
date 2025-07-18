@@ -198,26 +198,31 @@ def load_user(user_id):
 #=================================
 @app.route('/voir_liste')
 def voir_liste():
+    # 🛡️ Vérification de session
     if 'username' not in session:
         return redirect(url_for('login'))
 
     try:
+        # 🔐 Connexion aux credentials Google Sheets
         creds_dict = json.loads(os.environ["GOOGLE_CREDENTIALS_JSON"])
         creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, SCOPE)
         client = gspread.authorize(creds)
 
-        # 🔍 Lecture du range spécifique A1:P500
-        sheet = client.open_by_key(SHEET_ID).worksheet("Donnees_Site_Users")
-        raw_data = sheet.get("A1:P500")["values"]
+        # 📄 Accès à la feuille "DonneesSite_Users"
+        sheet = client.open_by_key(SHEET_ID).worksheet("DonneesSite_Users")
 
-        # 🧠 Transformation des lignes en dictionnaires (comme get_all_records)
+        # 🔍 Lecture du range A1:P500
+        raw_data = sheet.get("A1:P500")
+
+        # 🧠 Transformation en liste de dictionnaires (avec en-tête)
         headers = raw_data[0] if raw_data else []
-        records = [dict(zip(headers, row)) for row in raw_data]  # Ignore l’en-tête
+        records = [dict(zip(headers, row)) for row in raw_data]
 
     except Exception as e:
         print("⚠️ Erreur lecture Google Sheets :", e)
         records = []
 
+    # 📄 Rendu HTML avec les données
     return render_template('liste.html', records=records)
 #######CREATION DE COMPTE######
 @app.route('/create_account', methods=['GET', 'POST'])
