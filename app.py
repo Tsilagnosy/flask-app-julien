@@ -535,7 +535,7 @@ def chatgi():
             client = gspread.authorize(creds)
 
             # 📄 Accès à la feuille "AllChatgi"
-            sheet = client.open_by_key(SPREADSHEET_ID).worksheet("AllChatgi")
+            sheet = client.open_by_key(SHEET_ID).worksheet("AllChatgi")
             existing_data = sheet.get_all_values()[1:]  # Ignore l'en-tête
 
             # 🔍 Vérification des doublons sur fruit + num_fruit
