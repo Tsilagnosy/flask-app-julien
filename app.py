@@ -32,8 +32,6 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET", "clé-temporaire-par-défaut")
 # Après app.secret_key
 #app.config['WTF_CSRF_SECRET_KEY'] =os.environ.get("FLASK_SECRET")
-#app.config["SESSION_COOKIE_SECURE"] = True
-#app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 ###########NOUVELLE AJOUT####
 app.config.update(
     SESSION_COOKIE_SECURE=True,
@@ -130,9 +128,9 @@ def inserer_utilisateur(data):
     return utilisateurs.insert_one(data)
 
 # Routes
-@app.route('/')
+"""@app.route('/')
 def accueil():
-    return render_template('index.html')
+    return render_template('index.html') """
 """
 ###########Nouvelle####
 @app.before_request
@@ -207,7 +205,15 @@ def voir_liste():
         creds_dict = json.loads(os.environ["GOOGLE_CREDENTIALS_JSON"])
         creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, SCOPE)
         client = gspread.authorize(creds)
-        records = client.open_by_key(SHEET_ID).worksheet("Donnees_Site_Users").get_all_records()
+
+        # 🔍 Lecture du range spécifique A1:P500
+        sheet = client.open_by_key(SHEET_ID).worksheet("Donnees_Site_Users")
+        raw_data = sheet.get("Donnees_Site_Users!A1:P500")["values"]
+
+        # 🧠 Transformation des lignes en dictionnaires (comme get_all_records)
+        headers = raw_data[0] if raw_data else []
+        records = [dict(zip(headers, row)) for row in raw_data]  # Ignore l’en-tête
+
     except Exception as e:
         print("⚠️ Erreur lecture Google Sheets :", e)
         records = []
