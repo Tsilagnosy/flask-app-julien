@@ -531,7 +531,7 @@ def chatgi():
         try:
             # 🔐 Connexion sécurisée à Google Sheets
             creds_dict = json.loads(os.environ["GOOGLE_CREDENTIALS_JSON"])
-            creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, SCOPES)
+            creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, SCOPE)
             client = gspread.authorize(creds)
 
             # 📄 Accès à la feuille "AllChatgi"
