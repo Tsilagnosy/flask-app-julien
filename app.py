@@ -128,9 +128,9 @@ def inserer_utilisateur(data):
     return utilisateurs.insert_one(data)
 
 # Routes
-"""@app.route('/')
+@app.route('/')
 def accueil():
-    return render_template('index.html') """
+    return render_template('index.html') 
 """
 ###########Nouvelle####
 @app.before_request
