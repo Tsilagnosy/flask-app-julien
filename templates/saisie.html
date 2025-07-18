@@ -480,7 +480,6 @@
       </form>
     </div>
   </div>
-
 <script>
   document.getElementById('main-form').addEventListener('submit', function(e) {
     const dobInput = document.getElementById('dob');
@@ -499,7 +498,18 @@
       return;
     }
 
-    // ✅ Si tous les champs sont valides, on laisse le formulaire partir vers Flask
+    // Conversion finale en majuscules avant soumission
+    document.getElementById('nom').value = document.getElementById('nom').value.toUpperCase();
+    document.getElementById('fruit').value = document.getElementById('fruit').value.toUpperCase();
+  });
+
+  // Conversion en majuscules lors du blur
+  document.getElementById('nom').addEventListener('blur', function() {
+    this.value = this.value.toUpperCase();
+  });
+
+  document.getElementById('fruit').addEventListener('blur', function() {
+    this.value = this.value.toUpperCase();
   });
 
   // 🎯 Gestion visuelle du genre
@@ -534,27 +544,7 @@
     if (value.length > 5) value = value.slice(0, 5) + '/' + value.slice(5, 9);
     e.target.value = value;
   });
-  window.addEventListener("pageshow", function (event) {
-    if (event.persisted) {
-      document.querySelector("form").reset(); // Réinitialise le formulaire
-    };
-        // Conversion en majuscules
-    document.getElementById('nom').addEventListener('blur', function() {
-      this.value = this.value.toUpperCase();
-    });
 
-    document.getElementById('fruit').addEventListener('blur', function() {
-      this.value = this.value.toUpperCase();
-    });
-    
-          // Conversion finale en majuscules
-      document.getElementById('nom').value = document.getElementById('nom').value.toUpperCase();
-      document.getElementById('fruit').value = document.getElementById('fruit').value.toUpperCase();
-      if (!isValid) {
-        e.preventDefault();
-      }
-  });
-  <script>
   // Fonction pour nettoyer complètement le formulaire
   function clearForm() {
     const form = document.getElementById('main-form');
@@ -599,7 +589,7 @@
   // Nettoyage au chargement si c'est un retour arrière
   if (window.performance && window.performance.navigation.type === window.performance.navigation.TYPE_BACK_FORWARD) {
     clearForm();
-  });
+  }
 </script>
 </body>
 </html>
