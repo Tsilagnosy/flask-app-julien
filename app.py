@@ -211,11 +211,11 @@ def voir_liste():
         print(raw_data)
 
         # 🧹 Standardisation des en-têtes (colonne A à P = 0 à 15)
-        headers = [col.strip() for col in raw_data[0][:16]]
+        headers = [col.strip() for col in raw_data[1][:16]]
 
         # 🧠 Transformation en dictionnaire robuste
         records = []
-        for row in raw_data[1:]:
+        for row in raw_data[2:]:
             values = row[:16] + [None] * (16 - len(row))  # Complète la ligne si elle est trop courte
             record = dict(zip(headers, values))
             records.append(record)
