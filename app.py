@@ -52,7 +52,7 @@ app.config['MAIL_PASSWORD'] = 'vysl egbx ybpd ecjr'
 app.config['MAIL_DEFAULT_SENDER'] = 'alexcardosydonie@gmail.com'
 mail = Mail(app)
 
-# Constantes Admin
+###### #Constantes Admin#######
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 ADMIN_PASSWORD_HASH = generate_password_hash(ADMIN_PASSWORD)
@@ -60,11 +60,11 @@ MAX_ATTEMPTS = 6
 BLOCK_DURATION = timedelta(hours=1)
 login_attempts = {}  # Stockage des tentatives de connexion
 
-#INITIALIZATION LOGINMANAGER
+###INITIALIZATION LOGINMANAGER##
 login_manager=LoginManager()
 login_manager.init_app(app)
 login_manager.login_view="login"
-# Fonctions utilitaires
+######Fonctions utilitaires########
 def generate_validation_code():
     return str(random.randint(100000, 999999))
 
@@ -127,11 +127,11 @@ def inserer_utilisateur(data):
     data.setdefault("created_at", datetime.utcnow())
     return utilisateurs.insert_one(data)
 
-# Routes
-@app.route('/')
+########### Routes#####(((())))####
+"""@app.route('/')
 def accueil():
     return render_template('index.html') 
-"""
+    
 ###########Nouvelle####
 @app.before_request
 def csrf_protect():
@@ -384,7 +384,7 @@ def resend_code():
 
     return redirect(url_for('verify'))
 ########CONECTION INITIALE######
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def login():
     # Réinitialisation sécurisée de la session
     session.clear()
