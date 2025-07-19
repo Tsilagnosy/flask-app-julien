@@ -99,6 +99,28 @@
             content: " *";
             color: #e74c3c;
         }
+        .success-message {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #4CAF50;
+  color: white;
+  padding: 15px 25px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 1000;
+  animation: fadeInOut 3s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(-20px); }
+  10% { opacity: 1; transform: translateY(0); }
+  90% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-20px); }
+}
     </style>
 </head>
 <body>
@@ -111,34 +133,34 @@
                 <label for="hazonaina" class="required">HAZONAINA</label>
                 <input type="text" id="hazonaina" name="hazonaina" 
                        onblur="formatHazonaina(this)" 
-                       placeholder="Entrez le hazoaina" required>
+                       placeholder="anarana  hazonaina" required>
             </div>
             
             <div class="form-group">
                 <label for="sela">SELA</label>
                 <input type="text" id="sela" name="sela" 
-                       maxlength="5" 
-                       placeholder="Max 5 caractères">
+                       maxlength="4" 
+                       placeholder="Tsy asina Cell fa tonga dia laharana">
             </div>
             
             <!-- Section VOANKAZO -->
             <div class="form-group">
                 <label for="voankazo" class="required">VOANKAZO</label>
                 <input type="text" id="voankazo" name="voankazo" 
-                       placeholder="Type de voankazo" required>
+                       placeholder="anarana voankazo" required>
             </div>
             
             <div class="form-group">
                 <label for="nomerao" class="required">NOMERAO</label>
                 <input type="tel" id="nomerao" name="nomerao" 
                        pattern="[0-9]{10}" 
-                       placeholder="Numéro de téléphone" required>
+                       placeholder="Nomerao Ny Finday" required>
             </div>
             
             <div class="form-group">
                 <label for="adiresy">ADIRESY</label>
                 <input type="text" id="adiresy" name="adiresy" 
-                       placeholder="Adresse complète">
+                       placeholder="Adiresy feno">
             </div>
             
             <!-- Section GENRE -->
@@ -166,66 +188,99 @@
             <button type="submit" class="submit-btn">Envoyer</button>
         </form>
     </div>
-    
     <script>
-        // Fonction pour formater le HAZONAINA en majuscules et supprimer les espaces inutiles
-        function formatHazonaina(input) {
-            if (input.value) {
-                // Supprimer les espaces multiples et les espaces en début/fin
-                let valeur = input.value.trim().replace(/\s+/g, ' ');
-                // Convertir en majuscules
-                input.value = valeur.toUpperCase();
-            }
-        }
-        
-        // Fonction de validation du formulaire
-        function validerFormulaire() {
-            // Vous pouvez ajouter des validations supplémentaires ici si nécessaire
-            console.log("Formulaire validé, envoi en cours...");
-            
-            // Nettoyer le formulaire après soumission
-            setTimeout(clearForm, 0);
-            
-            return true; // Permet l'envoi réel du formulaire
-        }
-        
-        // Fonction pour nettoyer complètement le formulaire
-        function clearForm() {
-            const form = document.getElementById('monFormulaire');
-            
-            // Réinitialiser tous les champs input
-            const inputs = form.querySelectorAll('input[type="text"], input[type="tel"]');
-            inputs.forEach(input => {
-                input.value = '';
-            });
-            
-            // Réinitialiser les boutons radio
-            const radios = form.querySelectorAll('input[type="radio"]');
-            radios.forEach(radio => {
-                radio.checked = false;
-            });
-            
-            // Réinitialiser les sélections (si jamais vous ajoutez des select)
-            const selects = form.querySelectorAll('select');
-            selects.forEach(select => {
-                select.selectedIndex = 0;
-            });
-        }
-        
-        // Empêcher la restauration du cache du navigateur
-        window.onpageshow = function(event) {
-            if (event.persisted) {
-                clearForm();
-            }
-        };
-        
-        // Nettoyer le formulaire au chargement de la page (au cas où)
-        document.addEventListener('DOMContentLoaded', function() {
-            // Vérifier si la page est chargée depuis le cache
-            if (window.performance && window.performance.navigation.type === window.performance.navigation.TYPE_BACK_FORWARD) {
-                clearForm();
-            }
-        });
-    </script>
+    // ===== FONCTIONS EXISTANTES (conservées) =====
+function selectGender(element, gender) {
+  document.querySelectorAll('.gender-option').forEach(opt => opt.classList.remove('selected'));
+  element.classList.add('selected');
+  document.getElementById('gender').value = gender;
+}
+
+function toggleCustomReligion(select) {
+  const customInput = document.getElementById('custom-religion');
+  if (select.value === 'autre') {
+    customInput.style.display = 'block';
+    customInput.setAttribute('name', 'religion');
+    customInput.required = true;
+  } else {
+    customInput.style.display = 'none';
+    customInput.removeAttribute('name');
+    customInput.required = false;
+  }
+}
+
+function formatDateInput(e) {
+  let value = e.target.value.replace(/\D/g, '');
+  if (value.length > 2) value = value.slice(0, 2) + '/' + value.slice(2);
+  if (value.length > 5) value = value.slice(0, 5) + '/' + value.slice(5, 9);
+  e.target.value = value;
+}
+
+function clearForm() {
+  document.getElementById('main-form').reset();
+  document.querySelectorAll('.gender-option').forEach(opt => opt.classList.remove('selected'));
+  document.getElementById('custom-religion').style.display = 'none';
+}
+
+// ===== NOUVELLES FONCTIONS =====
+function validateTextFields() {
+  const fields = ['hazonaina', 'voankazo'];
+  let isValid = true;
+
+  fields.forEach(id => {
+    const field = document.getElementById(id);
+    if (/[0-9]/.test(field.value)) {
+      field.style.borderColor = '#ff4444';
+      isValid = false;
+    }
+  });
+
+  return isValid;
+}
+
+function showSuccessMessage() {
+  const successDiv = document.createElement('div');
+  successDiv.innerHTML = `
+    <div class="success-message">
+      <i class="fas fa-check-circle"></i>
+      Envoi réussi !
+    </div>
+  `;
+  document.body.appendChild(successDiv);
+  setTimeout(() => successDiv.remove(), 3000);
+}
+
+// ===== INITIALISATION =====
+document.addEventListener('DOMContentLoaded', function() {
+  // Configuration des champs texte
+  ['hazonaina', 'voankazo'].forEach(id => {
+    const field = document.getElementById(id);
+    field.addEventListener('input', function() {
+      this.value = this.value.replace(/[0-9]/g, '');
+    });
+    field.addEventListener('blur', function() {
+      this.value = this.value.toUpperCase();
+    });
+});
+  // Configuration du datepicker
+  document.getElementById('dob').addEventListener('input', formatDateInput);
+
+  // Gestion de la soumission
+  document.getElementById('main-form').addEventListener('submit', function(e) {
+    if (!validateTextFields()) {
+      e.preventDefault();
+      alert('Les champs HAZONAINA et VOANKAZO ne doivent pas contenir de chiffres');
+      return;
+    }
+
+    // Autres validations existantes...
+    // (date de naissance, genre, etc.)
+
+    // Si tout est valide
+    showSuccessMessage();
+    setTimeout(clearForm, 100);
+  });
+});
+</script>
 </body>
 </html>

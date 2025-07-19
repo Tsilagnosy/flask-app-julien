@@ -473,15 +473,13 @@
         <button type="submit" class="submit-btn">
           <i class="fas fa-paper-plane"></i> Envoyer
         </button>
-        <p class="text-muted mt-4"><br>Un retour, une idée ou un souci ?</p>
-<a href="{{ url_for('contact') }}" class="btn btn-outline-primary">
-  💌Contacter le développeur 
-</a>
+        <p class="text-muted mt-4"><br>Fenoy Tsara Ny zavatra rehetra</p>
       </form>
     </div>
   </div>
 <script>
   document.getElementById('main-form').addEventListener('submit', function(e) {
+    // Validation existante
     const dobInput = document.getElementById('dob');
     const genderValue = document.getElementById('gender').value;
 
@@ -498,9 +496,68 @@
       return;
     }
 
+    // 🔒 Nouvelles validations de sécurité
+    const nomInput = document.getElementById('nom');
+    const fruitInput = document.getElementById('fruit');
+    const cellInput = document.getElementById('cell');
+    const numeroInput = document.getElementById('numero');
+    const numFruitInput = document.getElementById('numFruit');
+    const adresseInput = document.getElementById('adresse');
+
+    // Validation Nom et Fruit (lettres uniquement)
+    const lettersOnlyRegex = /^[a-zA-ZÀ-ÿ\s\-']+$/;
+    
+    if (!lettersOnlyRegex.test(nomInput.value)) {
+      e.preventDefault();
+      alert('Le champ Nom ne doit contenir que des lettres (pas de chiffres)');
+      nomInput.focus();
+      return;
+    }
+
+    if (!lettersOnlyRegex.test(fruitInput.value)) {
+      e.preventDefault();
+      alert('Le champ Fruit ne doit contenir que des lettres (pas de chiffres)');
+      fruitInput.focus();
+      return;
+    }
+
+    // Validation Cell (max 4 caractères)
+    if (cellInput.value.length > 4) {
+      e.preventDefault();
+      alert('Le champ Cell ne doit pas dépasser 4 caractères');
+      cellInput.focus();
+      return;
+    }
+
+    // Validation Numéro et NumFruit (exactement 10 chiffres, commençant par 03)
+    const phoneRegex = /^03\d{8}$/;
+    
+    if (!phoneRegex.test(numeroInput.value)) {
+      e.preventDefault();
+      alert('Le Numéro doit contenir exactement 10 chiffres et commencer par 03');
+      numeroInput.focus();
+      return;
+    }
+
+    if (!phoneRegex.test(numFruitInput.value)) {
+      e.preventDefault();
+      alert('Le NumFruit doit contenir exactement 10 chiffres et commencer par 03');
+      numFruitInput.focus();
+      return;
+    }
+
+    // Validation Adresse (pas uniquement des chiffres)
+    const onlyNumbersRegex = /^\d+$/;
+    if (onlyNumbersRegex.test(adresseInput.value)) {
+      e.preventDefault();
+      alert('L\'Adresse ne peut pas être composée uniquement de chiffres');
+      adresseInput.focus();
+      return;
+    }
+
     // Conversion finale en majuscules avant soumission
-    document.getElementById('nom').value = document.getElementById('nom').value.toUpperCase();
-    document.getElementById('fruit').value = document.getElementById('fruit').value.toUpperCase();
+    nomInput.value = nomInput.value.toUpperCase();
+    fruitInput.value = fruitInput.value.toUpperCase();
   });
 
   // Conversion en majuscules lors du blur
@@ -590,6 +647,39 @@
   if (window.performance && window.performance.navigation.type === window.performance.navigation.TYPE_BACK_FORWARD) {
     clearForm();
   }
+
+  // 🔒 Empêcher la saisie de chiffres dans les champs Nom et Fruit
+  document.getElementById('nom').addEventListener('input', function(e) {
+    this.value = this.value.replace(/[0-9]/g, '');
+  });
+
+  document.getElementById('fruit').addEventListener('input', function(e) {
+    this.value = this.value.replace(/[0-9]/g, '');
+  });
+
+  // 🔒 Limiter la longueur du champ Cell à 4 caractères
+  document.getElementById('cell').addEventListener('input', function(e) {
+    if (this.value.length > 4) {
+      this.value = this.value.slice(0, 4);
+    }
+  });
+
+  // 🔒 Validation en temps réel pour les numéros (commençant par 03)
+  document.getElementById('numero').addEventListener('input', function(e) {
+    if (this.value.length > 0 && !this.value.startsWith('03')) {
+      this.setCustomValidity('Le numéro doit commencer par 03');
+    } else {
+      this.setCustomValidity('');
+    }
+  });
+
+  document.getElementById('numFruit').addEventListener('input', function(e) {
+    if (this.value.length > 0 && !this.value.startsWith('03')) {
+      this.setCustomValidity('Le numéro doit commencer par 03');
+    } else {
+      this.setCustomValidity('');
+    }
+  });
 </script>
 </body>
 </html>
