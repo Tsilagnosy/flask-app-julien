@@ -254,7 +254,7 @@
       <h2>🟢 FORMAT HO AN'IREO VOANKAZO MANOHY LESONA</h2>
     </header>
     
-    <form>
+    <form action="/envoyer_telegram" method="POST">
       <fieldset>
         <legend>☀️ Fampidirana</legend>
         <div class="form-grid">
@@ -351,7 +351,7 @@ document.querySelector('form').addEventListener('submit', async function(e) {
         const result = await response.json();
 
     	
-        catch (err) {
+      }  catch (err) {
         console.error(err);
         alert('Erreur réseau ou serveur');
     }
