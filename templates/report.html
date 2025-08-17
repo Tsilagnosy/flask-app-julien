@@ -350,13 +350,8 @@ document.querySelector('form').addEventListener('submit', async function(e) {
 
         const result = await response.json();
 
-        if (response.ok) {
-            alert(result.message || 'Succès!');
-            this.reset();
-        } else {
-            alert(result.error || 'Échec de l\'envoi.');
-        }
-    } catch (err) {
+    	
+        catch (err) {
         console.error(err);
         alert('Erreur réseau ou serveur');
     }
